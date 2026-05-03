@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết công việc - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .detail-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .header-section {
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            color: white;
+            padding: 2rem;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            color: #212529;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .description-box {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <a href="/jobs" class="btn btn-link text-decoration-none text-muted mb-3 p-0">
+                    <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                </a>
+
+                <div class="card detail-card shadow-lg">
+                    <div class="header-section">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h1 class="display-6 fw-bold mb-1" th:text="${job.title}">Job Title</h1>
+                                <p class="mb-0 opacity-75">
+                                    <i class="bi bi-building"></i> <span th:text="${job.department}">Department</span>
+                                    | <i class="bi bi-geo-alt"></i> <span th:text="${job.location}">Location</span>
+                                </p>
+                            </div>
+                            <span class="badge bg-white text-primary px-3 py-2" th:text="${job.status}">Status</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5 bg-white">
+                        <div class="row mb-5 text-center text-md-start">
+                            <div class="col-md-4 mb-3">
+                                <div class="info-label">Mức lương</div>
+                                <div class="info-value text-success"><i class="bi bi-cash-stack"></i> <span
+                                        th:text="${job.salaryRange}">Salary</span></div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="info-label">Ngày đăng tuyển</div>
+                                <div class="info-value"><i class="bi bi-calendar-event"></i> <span
+                                        th:text="${#temporals.format(job.publishDate, 'dd/MM/yyyy')} ?: 'Chưa xuất bản'">Date</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="info-label">Mã HR phụ trách</div>
+                                <div class="info-value text-primary fw-bold"><i class="bi bi-person-badge"></i> #<span
+                                        th:text="${job.hrId}">HRID</span></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3 border-bottom pb-2">Mô tả công việc</h5>
+                            <div class="description-box" th:text="${job.description}">
+                                Description text goes here...
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-5 border-top pt-4">
+                            <a th:href="@{/jobs/edit/{id}(id=${job.id})}" class="btn btn-warning px-4 fw-bold">
+                                <i class="bi bi-pencil-square"></i> Chỉnh sửa
+                            </a>
+                            <button class="btn btn-outline-primary px-4 fw-bold" onclick="window.print()">
+                                <i class="bi bi-printer"></i> In thông tin
+                                </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

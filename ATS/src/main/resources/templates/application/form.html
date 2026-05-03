@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Form - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f4f7f6;
+        }
+
+        .container {
+            max-width: 650px;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .status-section {
+            background-color: #fff3cd;
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px dashed #ffc107;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="text-center mb-4 fw-bold text-primary">
+                    <i class="bi bi-file-earmark-person me-2"></i>
+                    <span th:if="${application.id == null}">Tạo Đơn Ứng Tuyển</span>
+                    <span th:if="${application.id != null}">Cập Nhật Trạng Thái</span>
+                </h2>
+
+                <form
+                    th:action="${application.id == null ? '/applications/create' : '/applications/edit/' + application.id}"
+                    th:method="post" th:object="${application}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Vị trí tuyển dụng <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                            <select th:field="*{jobId}" class="form-select" required>
+                                <option value="">-- Chọn vị trí cần tuyển --</option>
+                                <option th:each="j : ${jobs}" th:value="${j.id}" th:text="${j.title}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ứng viên <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <select th:field="*{candidateId}" class="form-select" required>
+                                <option value="">-- Chọn ứng viên ứng tuyển --</option>
+                                <option th:each="c : ${candidates}" th:value="${c.id}" th:text="${c.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 status-section" th:if="${application.id != null}">
+                        <label class="form-label text-dark"><i class="bi bi-gear-fill me-1"></i> Trạng thái xét
+                            duyệt</label>
+                        <select th:field="*{status}" class="form-select border-warning">
+                            <option value="PENDING">PENDING (Chờ duyệt)</option>
+                            <option value="SCREENING">SCREENING (Lọc hồ sơ)</option>
+                            <option value="INTERVIEW">INTERVIEW (Phỏng vấn)</option>
+                            <option value="OFFER">OFFER (Mời làm việc)</option>
+                            <option value="REJECTED">REJECTED (Từ chối)</option>
+                        </select>
+                        <div class="form-text mt-2 text-muted small">Thay đổi trạng thái để cập nhật tiến độ tuyển dụng.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Ghi chú của HR (HR Notes)</label>
+                        <textarea th:field="*{hrNotes}" class="form-control" rows="4"
+                            placeholder="Nhận xét sơ bộ về ứng viên, lịch hẹn phỏng vấn..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            <span th:text="${application.id == null ? 'Gửi Đơn Ứng Tuyển' : 'Cập Nhật Đơn'}"></span>
+                        </button>
+                        <a href="/applications" class="btn btn-outline-secondary">Quay lại danh sách</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách công việc - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .main-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .table thead {
+            background-color: #e9ecef;
+        }
+
+        .status-badge {
+            width: 85px;
+            display: inline-block;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid py-4 px-4">
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card main-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h3 fw-bold text-dark mb-0">Quản lý Jobs</h2>
+                    <a href="/jobs/create" class="btn btn-primary shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Create New Job
+                    </a>
+                </div>
+
+                <form method="get" class="row g-2 mb-4">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i
+                                    class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="keyword" class="form-control border-start-0" th:value="${keyword}"
+                                placeholder="Title, department..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-100">Search</button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th class="text-muted fw-semibold">ID</th>
+                                <th class="fw-semibold">Title</th>
+                                <th class="fw-semibold">Department</th>
+                                <th class="fw-semibold">Location</th>
+                                <th class="fw-semibold text-center">Status</th>
+                                <th class="fw-semibold text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="job : ${jobPage.records}">
+                                <td th:text="${job.id}" class="text-muted small">1</td>
+                                <td>
+                                    <span th:text="${job.title}" class="fw-bold text-dark d-block"></span>
+                                    <small th:text="${job.salaryRange}" class="text-success fw-medium"></small>
+                                </td>
+                                <td th:text="${job.department}">Dept</td>
+                                <td><i class="bi bi-geo-alt small me-1"></i><span th:text="${job.location}"></span></td>
+                                <td class="text-center">
+                                    <span th:if="${job.status == 'PUBLISHED'}"
+                                        class="badge bg-success-subtle text-success border border-success status-badge">PUBLISHED</span>
+                                    <span th:if="${job.status == 'DRAFT'}"
+                                        class="badge bg-warning-subtle text-warning border border-warning status-badge text-dark">DRAFT</span>
+                                    <span th:if="${job.status == 'CLOSED'}"
+                                        class="badge bg-secondary-subtle text-secondary border border-secondary status-badge text-dark">CLOSED</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm border rounded">
+                                        <a th:href="@{/jobs/view/{id}(id=${job.id})}"
+                                            class="btn btn-sm btn-white text-primary" title="View"><i
+                                                class="bi bi-eye"></i></a>
+                                        <a th:href="@{/jobs/edit/{id}(id=${job.id})}"
+                                            class="btn btn-sm btn-white text-warning" title="Edit"><i
+                                                class="bi bi-pencil-square"></i></a>
+                                        <a th:href="@{/jobs/delete/{id}(id=${job.id})}"
+                                            class="btn btn-sm btn-white text-danger" title="Delete"
+                                            onclick="return confirm('Xóa job này?')"><i class="bi bi-trash"></i></a>
+                                    </div>
+
+                                    <form th:if="${job.status != 'PUBLISHED'}"
+                                        th:action="@{/jobs/change-status/{id}(id=${job.id})}" method="post"
+                                        style="display:inline" class="ms-1">
+                                        <input type="hidden" name="status" value="PUBLISHED" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Publish</button>
+                                    </form>
+                                    <form th:if="${job.status == 'PUBLISHED'}"
+                                        th:action="@{/jobs/change-status/{id}(id=${job.id})}" method="post"
+                                        style="display:inline" class="ms-1">
+                                        <input type="hidden" name="status" value="CLOSED" />
+                                        <button type="submit" class="btn btn-sm btn-outline-dark">Close</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav th:if="${jobPage.pages > 1}" aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination pagination-sm justify-content-center">
+                        <li class="page-item" th:each="i: ${#numbers.sequence(1, jobPage.pages)}"
+                            th:classappend="${i == jobPage.current} ? 'active'">
+                            <a class="page-link" th:href="@{/jobs(page=${i}, size=${jobPage.size}, keyword=${keyword})}"
+                                th:text="${i}"></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

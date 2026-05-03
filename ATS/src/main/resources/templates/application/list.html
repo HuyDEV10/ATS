@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Đơn ứng tuyển - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .main-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-section {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-badge {
+            min-width: 100px;
+        }
+
+        .table-action-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid py-4 px-4">
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4"
+            role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-clipboard-data me-2"></i>Danh sách Đơn ứng tuyển</h2>
+            <a href="/applications/create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg"></i> Tạo đơn mới
+            </a>
+        </div>
+
+        <div class="filter-section shadow-sm">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Vị trí công việc</label>
+                    <select name="jobId" class="form-select border-secondary-subtle">
+                        <option value="">Tất cả Job</option>
+                        <option th:each="j : ${jobs}" th:value="${j.id}" th:text="${j.title}"
+                            th:selected="${jobId == j.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Ứng viên</label>
+                    <select name="candidateId" class="form-select border-secondary-subtle">
+                        <option value="">Tất cả ứng viên</option>
+                        <option th:each="c : ${candidates}" th:value="${c.id}" th:text="${c.name}"
+                            th:selected="${candidateId == c.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Trạng thái</label>
+                    <select name="status" class="form-select border-secondary-subtle">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING" th:selected="${status == 'PENDING'}">PENDING</option>
+                        <option value="SCREENING" th:selected="${status == 'SCREENING'}">SCREENING</option>
+                        <option value="INTERVIEW" th:selected="${status == 'INTERVIEW'}">INTERVIEW</option>
+                        <option value="OFFER" th:selected="${status == 'OFFER'}">OFFER</option>
+                        <option value="REJECTED" th:selected="${status == 'REJECTED'}">REJECTED</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="bi bi-filter"></i> Lọc kết quả
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card main-card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Thông tin đơn</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th>Ngày ứng tuyển</th>
+                                <th class="text-center">Thao tác nhanh</th>
+                                <th class="text-center pe-4">Quản lý</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="app : ${appPage.records}">
+                                <td class="ps-4 text-muted small" th:text="${app.id}"></td>
+                                <td>
+                                    <div class="fw-bold" th:text="'Job ID: ' + ${app.jobId}"></div>
+                                    <div class="small text-muted" th:text="'Candidate ID: ' + ${app.candidateId}"></div>
+                                </td>
+                                <td class="text-center">
+                                    <span
+                                        th:classappend="${app.status == 'OFFER' ? 'bg-success' : (app.status == 'REJECTED' ? 'bg-danger' : (app.status == 'INTERVIEW' ? 'bg-info' : 'bg-warning text-dark'))}"
+                                        class="badge status-badge rounded-pill" th:text="${app.status}"></span>
+                                </td>
+                                <td th:text="${#temporals.format(app.applicationDate, 'dd/MM/yyyy')}"></td>
+                                <td class="text-center">
+                                    <form th:action="@{/applications/change-status/{id}(id=${app.id})}" method="post"
+                                        class="row g-1 justify-content-center">
+                                        <div class="col-auto">
+                                            <select name="status" class="form-select form-select-sm border-primary"
+                                                style="width: 120px;">
+                                                <option value="PENDING">PENDING</option>
+                                                <option value="SCREENING">SCREENING</option>
+                                                <option value="INTERVIEW">INTERVIEW</option>
+                                                <option value="OFFER">OFFER</option>
+                                                <option value="REJECTED">REJECTED</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-auto">
+                                            <button type="submit" class="btn btn-sm btn-primary">OK</button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="btn-group">
+                                        <a th:href="@{/applications/view/{id}(id=${app.id})}"
+                                            class="btn btn-outline-secondary btn-sm" title="Chi tiết"><i
+                                                class="bi bi-eye"></i></a>
+                                        <a th:href="@{/applications/edit/{id}(id=${app.id})}"
+                                            class="btn btn-outline-warning btn-sm" title="Sửa"><i
+                                                class="bi bi-pencil"></i></a>
+                                        <a th:href="@{/applications/delete/{id}(id=${app.id})}"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Xóa đơn này?')" title="Xóa"><i
+                                                class="bi bi-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${appPage.records.isEmpty()}">
+                                <td colspan="6" class="text-center py-5 text-muted">Không tìm thấy đơn ứng tuyển nào.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <nav th:if="${appPage.pages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:each="i: ${#numbers.sequence(1, appPage.pages)}"
+                    th:classappend="${i == appPage.current} ? 'active'">
+                    <a class="page-link"
+                        th:href="@{/applications(page=${i}, size=${appPage.size}, jobId=${jobId}, candidateId=${candidateId}, status=${status})}"
+                        th:text="${i}"></a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="mt-4 text-center">
+            <a href="/jobs" class="btn btn-link text-decoration-none">Công việc</a>
+            <span class="text-muted">|</span>
+            <a href="/candidates" class="btn btn-link text-decoration-none">Ứng viên</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

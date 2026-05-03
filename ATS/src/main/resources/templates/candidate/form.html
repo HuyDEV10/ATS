@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Form - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f4f7f6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="text-center mb-4 fw-bold text-primary">
+                    <i class="bi bi-person-plus-fill me-2"></i>
+                    <span th:if="${candidate.id == null}">Tạo Hồ Sơ Ứng Viên</span>
+                    <span th:if="${candidate.id != null}">Chỉnh Sửa Hồ Sơ</span>
+                </h2>
+
+                <form th:action="${candidate.id == null ? '/candidates/create' : '/candidates/edit/' + candidate.id}"
+                    th:method="post" th:object="${candidate}">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" th:field="*{name}" class="form-control" placeholder="Nguyễn Văn A"
+                                    required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" th:field="*{email}" class="form-control"
+                                    placeholder="example@gmail.com" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Số điện thoại</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text" th:field="*{phone}" class="form-control" placeholder="0905..." />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Số năm kinh nghiệm</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                <input type="number" th:field="*{experienceYears}" class="form-control"
+                                    placeholder="Ví dụ: 2" />
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Nguồn ứng viên</label>
+                            <select th:field="*{source}" class="form-select">
+                                <option value="manual">Manual (Nhập tay)</option>
+                                <option value="upload">Upload (Tải lên)</option>
+                                <option value="import">Import (Nhập file)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-4">
+                            <label class="form-label">Kỹ năng chuyên môn</label>
+                            <textarea th:field="*{skills}" class="form-control" rows="3"
+                                placeholder="Ví dụ: Java, Spring Boot, ReactJS... (Cách nhau bằng dấu phẩy)"></textarea>
+                            <div class="form-text">Mẹo: Hãy liệt kê các kỹ năng chính để AI dễ dàng phân loại.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2">
+                        <a href="/candidates" class="btn btn-outline-secondary px-4 me-md-2">Quay lại</a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                            <span th:text="${candidate.id == null ? 'Lưu Hồ Sơ' : 'Cập Nhật Hồ Sơ'}"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

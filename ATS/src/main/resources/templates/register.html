@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Thêm một chút tùy chỉnh để căn giữa màn hình đẹp hơn */
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .register-card {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container register-card">
+        <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
+
+        <div th:if="${error}" th:text="${error}" class="alert alert-danger p-2 small mb-3"></div>
+
+        <form th:action="@{/auth/doRegister}" method="post">
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Tên đăng nhập" required />
+            </div>
+            <div class="mb-3">
+                <input type="email" name="email" class="form-control" placeholder="Email" required />
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Mật khẩu" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-2">Đăng ký</button>
+        </form>
+
+        <p class="text-center mt-3 mb-0">
+            Đã có tài khoản? <a th:href="@{/auth/login}" class="text-decoration-none">Đăng nhập</a>
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

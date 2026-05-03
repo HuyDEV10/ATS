@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Trang chủ - SmartATS</title>
+</head>
+
+<body>
+    <h2>Chào mừng <span th:text="${user.username}"></span> (<span th:text="${user.role}"></span>)</h2>
+    <p>Email: <span th:text="${user.email}"></span></p>
+    <a th:href="@{/auth/logout}">Đăng xuất</a>
+    <a th:href="@{/jobs}">Manage Jobs</a>
+    <hr>
+    <h3>Chức năng sẽ phát triển sau...</h3>
+</body>
+
+</html>

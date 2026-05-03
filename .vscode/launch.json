@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-AtsApplication<ATS>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.dacn.ATS.AtsApplication",
+            "projectName": "ATS",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

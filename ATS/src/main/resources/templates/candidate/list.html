@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách ứng viên - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .main-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .table thead {
+            background-color: #f1f3f5;
+        }
+
+        .skill-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 50px;
+            margin-right: 3px;
+        }
+
+        .source-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid py-4 px-4">
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card main-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="h3 fw-bold text-dark mb-1">Hồ sơ Ứng viên</h2>
+                        <p class="text-muted small mb-0">Quản lý và theo dõi danh sách ứng viên trong hệ thống</p>
+                    </div>
+                    <a href="/candidates/create" class="btn btn-primary px-4 shadow-sm">
+                        <i class="bi bi-person-plus me-1"></i> Thêm ứng viên
+                    </a>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-5">
+                        <form method="get" class="input-group">
+                            <input type="text" name="keyword" class="form-control border-end-0" th:value="${keyword}"
+                                placeholder="Tìm tên, email, kỹ năng..." />
+                            <button class="btn btn-outline-secondary border-start-0 bg-white text-muted" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-7 text-md-end">
+                        <a href="/jobs" class="btn btn-outline-dark">
+                            <i class="bi bi-briefcase me-1"></i> Quản lý Jobs
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th class="text-muted small">ID</th>
+                                <th>Ứng viên</th>
+                                <th>Liên hệ</th>
+                                <th>Kỹ năng</th>
+                                <th class="text-center">Kinh nghiệm</th>
+                                <th>Nguồn</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${candidatePage.records}">
+                                <td th:text="${c.id}" class="text-muted small">1</td>
+                                <td>
+                                    <div class="fw-bold text-dark" th:text="${c.name}">Name</div>
+                                    <div class="text-muted x-small" style="font-size: 0.8rem;" th:text="${c.email}">
+                                        email@test.com</div>
+                                </td>
+                                <td th:text="${c.phone}">090...</td>
+                                <td>
+                                    <div class="d-flex flex-wrap">
+                                        <span th:text="${c.skills}"></span>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill bg-light text-dark border fw-normal"
+                                        th:text="${c.experienceYears + ' năm'}">0 năm</span>
+                                </td>
+                                <td>
+                                    <span th:switch="${c.source}">
+                                        <span th:case="'manual'"><span
+                                                class="source-indicator bg-info"></span>Manual</span>
+                                        <span th:case="'upload'"><span
+                                                class="source-indicator bg-success"></span>Upload</span>
+                                        <span th:case="'import'"><span
+                                                class="source-indicator bg-warning"></span>Import</span>
+                                        <span th:case="*"><span
+                                                class="source-indicator bg-secondary"></span>[[${c.source}]]</span>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a th:href="@{/candidates/view/{id}(id=${c.id})}"
+                                            class="btn btn-sm btn-outline-primary" title="Xem chi tiết"><i
+                                                class="bi bi-eye"></i></a>
+                                        <a th:href="@{/candidates/edit/{id}(id=${c.id})}"
+                                            class="btn btn-sm btn-outline-warning" title="Sửa"><i
+                                                class="bi bi-pencil"></i></a>
+                                        <a th:href="@{/candidates/delete/{id}(id=${c.id})}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Xóa ứng viên này?')" title="Xóa"><i
+                                                class="bi bi-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${candidatePage.records.isEmpty()}">
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people display-4 d-block mb-2"></i>
+                                    Không tìm thấy ứng viên nào.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav th:if="${candidatePage.pages > 1}" class="mt-4">
+                    <ul class="pagination pagination-sm justify-content-center">
+                        <li class="page-item" th:each="i: ${#numbers.sequence(1, candidatePage.pages)}"
+                            th:classappend="${i == candidatePage.current} ? 'active'">
+                            <a class="page-link"
+                                th:href="@{/candidates(page=${i}, size=${candidatePage.size}, keyword=${keyword})}"
+                                th:text="${i}"></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
