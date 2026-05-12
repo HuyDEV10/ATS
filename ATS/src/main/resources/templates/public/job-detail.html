@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Chi tiết việc làm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container py-4">
+
+        <h2 th:text="${job.title}"></h2>
+
+        <p>
+            <strong>Phòng ban:</strong>
+            <span th:text="${job.department}"></span>
+        </p>
+
+        <p>
+            <strong>Địa điểm:</strong>
+            <span th:text="${job.location}"></span>
+        </p>
+
+        <p>
+            <strong>Lương:</strong>
+            <span th:text="${job.salaryRange}"></span>
+        </p>
+
+        <div class="card p-3 mb-4">
+            <h5>Mô tả công việc</h5>
+            <p th:text="${job.description}"></p>
+        </div>
+
+        <div class="card p-4">
+            <h4>Ứng tuyển vị trí này</h4>
+
+            <form th:action="@{/public/apply/{id}(id=${job.id})}" method="post" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label>Họ tên</label>
+                    <input name="name" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input name="email" type="email" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Số điện thoại</label>
+                    <input name="phone" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label>Kỹ năng</label>
+                    <input name="skills" class="form-control" placeholder="Java, Spring Boot, MySQL">
+                </div>
+
+                <div class="mb-3">
+                    <label>Số năm kinh nghiệm</label>
+                    <input name="experienceYears" type="number" class="form-control" value="0">
+                </div>
+
+                <div class="mb-3">
+                    <label>CV</label>
+                    <input name="file" type="file" class="form-control" required>
+                </div>
+
+                <button class="btn btn-success">Nộp hồ sơ</button>
+            </form>
+        </div>
+
+    </div>
+</body>
+
+</html>

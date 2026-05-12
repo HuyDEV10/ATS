@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CV Screening Result - SmartATS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .report-container {
+            max-width: 1000px;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        .card-report {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .ai-header {
+            background: linear-gradient(135deg, #6610f2, #0d6efd);
+            color: white;
+            padding: 2.5rem;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0 auto 1rem;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: #344767;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: #6610f2;
+        }
+
+        .badge-skill {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .list-group-item {
+            border: none;
+            padding-left: 0;
+            padding-right: 0;
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container report-container">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <a href="/applications" class="btn btn-link text-decoration-none text-muted p-0">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách đơn
+            </a>
+            <button class="btn btn-outline-dark btn-sm" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Xuất báo cáo AI
+            </button>
+        </div>
+
+        <div class="card card-report">
+            <div class="ai-header text-center">
+                <div class="score-circle">
+                    <span th:text="${result.overallScore + '%'}">0%</span>
+                </div>
+                <h2 class="fw-bold mb-1">Kết quả Phân tích AI</h2>
+                <p class="opacity-75 mb-0">Hệ thống đã tự động đánh giá CV dựa trên mô tả công việc</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5 bg-white">
+                <div class="row mb-5">
+                    <div class="col-md-4 mb-4">
+                        <label class="form-label d-flex justify-content-between fw-bold">
+                            Kỹ năng (Skills) <span th:text="${result.skillScore + '%'}"></span>
+                        </label>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-primary" th:style="'width: ' + ${result.skillScore} + '%'">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <label class="form-label d-flex justify-content-between fw-bold">
+                            Kinh nghiệm (Exp) <span th:text="${result.experienceScore + '%'}"></span>
+                        </label>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-info" th:style="'width: ' + ${result.experienceScore} + '%'">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <label class="form-label d-flex justify-content-between fw-bold">
+                            Từ khóa (Keywords) <span th:text="${result.keywordScore + '%'}"></span>
+                        </label>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" th:style="'width: ' + ${result.keywordScore} + '%'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h5 class="section-title"><i class="bi bi-check-circle-fill"></i> Kỹ năng phù hợp</h5>
+                        <div class="mb-4">
+                            <span th:each="skill : ${result.matchedSkills}"
+                                class="badge bg-success-subtle text-success border border-success-subtle badge-skill me-2"
+                                th:text="${skill}">Skill</span>
+                            <p th:if="${#lists.isEmpty(result.matchedSkills)}" class="text-muted italic">Không tìm thấy
+                                kỹ năng phù hợp.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="section-title text-danger"><i class="bi bi-x-circle-fill text-danger"></i> Kỹ năng
+                            còn thiếu</h5>
+                        <div class="mb-4">
+                            <span th:each="skill : ${result.missingSkills}"
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle badge-skill me-2"
+                                th:text="${skill}">Skill</span>
+                            <p th:if="${#lists.isEmpty(result.missingSkills)}" class="text-muted italic text-success">
+                                Ứng viên đáp ứng đủ kỹ năng yêu cầu!</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="section-title"><i class="bi bi-graph-up-arrow"></i> Điểm mạnh</h5>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li th:each="item : ${result.strengths}" class="list-group-item d-flex align-items-start">
+                                <i class="bi bi-plus-lg text-success me-2 mt-1"></i>
+                                <span th:text="${item}">Strength item</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="section-title"><i class="bi bi-graph-down-arrow text-warning"></i> Điểm yếu / Lưu ý
+                        </h5>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li th:each="item : ${result.weaknesses}" class="list-group-item d-flex align-items-start">
+                                <i class="bi bi-dash-lg text-danger me-2 mt-1"></i>
+                                <span th:text="${item}">Weakness item</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card bg-light border-0 rounded-4 mb-5 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold"><i class="bi bi-chat-quote-fill me-2 text-primary"></i> Đề xuất từ AI
+                            (Recommendation)</h5>
+                        <p class="mb-0 fs-5 text-dark" th:text="${result.recommendation}">Recommendation text</p>
+                    </div>
+                </div>
+
+                <h5 class="section-title"><i class="bi bi-question-circle"></i> Câu hỏi phỏng vấn gợi ý</h5>
+                <div class="row row-cols-1 row-cols-md-2 g-3">
+                    <div th:each="q : ${result.interviewQuestions}" class="col">
+                        <div class="p-3 border rounded-3 bg-white h-100 shadow-sm d-flex align-items-center">
+                            <span class="text-primary fw-bold me-3">Q:</span>
+                            <span th:text="${q}" class="small">Question text</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

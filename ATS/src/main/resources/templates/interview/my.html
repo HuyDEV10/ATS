@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Lịch phỏng vấn của tôi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container py-4">
+
+        <h2>Lịch phỏng vấn của tôi</h2>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Application</th>
+                    <th>Ngày</th>
+                    <th>Round</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="i : ${interviewPage.records}">
+                    <td th:text="${i.id}"></td>
+                    <td th:text="${i.applicationId}"></td>
+                    <td th:text="${#temporals.format(i.interviewDate, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${i.round}"></td>
+                    <td th:text="${i.status}"></td>
+                    <td th:text="${i.score}"></td>
+                    <td>
+                        <a th:href="@{/interviews/view/{id}(id=${i.id})}" class="btn btn-sm btn-primary">
+                            Xem
+                        </a>
+                        <a th:href="@{/interviews/edit/{id}(id=${i.id})}" class="btn btn-sm btn-warning">
+                            Feedback
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</body>
+
+</html>

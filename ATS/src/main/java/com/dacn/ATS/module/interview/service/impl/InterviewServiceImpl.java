@@ -17,6 +17,10 @@ import java.util.List;
 
 @Service
 public class InterviewServiceImpl implements InterviewService {
+    @Override
+    public Page<InterviewRecord> pageMyInterviews(int page, int size, Long interviewerId) {
+        return pageInterviews(page, size, null, interviewerId);
+    }
 
     @Autowired
     private InterviewRecordMapper interviewMapper;

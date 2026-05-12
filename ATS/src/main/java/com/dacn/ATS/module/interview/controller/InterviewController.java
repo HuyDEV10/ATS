@@ -1,6 +1,7 @@
 package com.dacn.ATS.module.interview.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.module.interview.entity.InterviewRecord;
 import com.dacn.ATS.module.interview.service.InterviewService;
 
@@ -13,13 +14,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/interviews")
 public class InterviewController {
-
+    @Autowired
+    private com.dacn.ATS.module.auth.service.UserService userService;
     @Autowired
     private InterviewService interviewService;
 
     // Lấy userId hiện tại (tạm thời)
     private Long getCurrentUserId() {
-        return 1L; // TODO: lấy từ SecurityContext
+        return CurrentUserUtil.getCurrentUserId(); // TODO: lấy từ SecurityContext
     }
 
     // Danh sách interview (có filter theo applicationId)
@@ -43,9 +45,23 @@ public class InterviewController {
         return "interview/form";
     }
 
+    @GetMapping("/my")
+    public String myInterviews(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+        Long interviewerId = getCurrentUserId();
+
+        Page<InterviewRecord> interviewPage = interviewService.pageMyInterviews(page, size, interviewerId);
+
+        model.addAttribute("interviewPage", interviewPage);
+
+        return "interview/my";
+    }
+
     @PostMapping("/create")
     public String scheduleInterview(@ModelAttribute InterviewRecord interview, RedirectAttributes redirectAttributes) {
-        interview.setInterviewerId(getCurrentUserId()); // hoặc lấy từ form
+        interview.setInterviewerId(getCurrentUserId()); // lấy từ form
         interviewService.scheduleInterview(interview);
         redirectAttributes.addFlashAttribute("success", "Interview scheduled");
         return "redirect:/interviews?applicationId=" + interview.getApplicationId();
@@ -66,6 +82,20 @@ public class InterviewController {
         interviewService.updateInterviewResult(interview);
         redirectAttributes.addFlashAttribute("success", "Interview updated");
         return "redirect:/interviews?applicationId=" + interview.getApplicationId();
+    }
+
+    @GetMapping("/assign")
+    public String assignForm(@RequestParam Long applicationId, Model model) {
+        model.addAttribute("applicationId", applicationId);
+
+        var interviewers = userService.findAllUsers()
+                .stream()
+                .filter(u -> "INTERVIEWER".equals(u.getRole()))
+                .toList();
+
+        model.addAttribute("interviewers", interviewers);
+
+        return "interview/assign";
     }
 
     // Hoàn thành phỏng vấn (ghi nhận feedback, score)

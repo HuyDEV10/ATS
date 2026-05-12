@@ -1,6 +1,7 @@
 package com.dacn.ATS.module.resume.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.module.resume.entity.Resume;
 import com.dacn.ATS.module.resume.service.ResumeService;
 
@@ -23,7 +24,7 @@ public class ResumeController {
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // TODO: thay bằng lấy từ principal sau khi có UserDetails
-        return 1L;
+        return CurrentUserUtil.getCurrentUserId();
     }
 
     @GetMapping

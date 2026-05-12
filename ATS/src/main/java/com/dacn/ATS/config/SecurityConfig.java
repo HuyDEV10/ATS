@@ -1,6 +1,8 @@
 package com.dacn.ATS.config;
 
 import com.dacn.ATS.module.auth.service.impl.CustomUserDetailsService;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -11,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+        @Autowired
+        private CustomLoginSuccessHandler customLoginSuccessHandler;
 
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -31,26 +35,53 @@ public class SecurityConfig {
                 http
                                 .authenticationProvider(authProvider)
                                 .authorizeHttpRequests(auth -> auth
+
                                                 .requestMatchers(
-                                                                "/auth/login",
-                                                                "/auth/test",
-                                                                "/auth/register",
-                                                                "/auth/doLogin",
-                                                                "/auth/doRegister",
-                                                                "/css/**",
-                                                                "/js/**",
-                                                                "/images/**",
-                                                                "/webjars/**",
-                                                                "/jobs/**",
-                                                                "/candidates/**",
-                                                                "/applications/**",
-                                                                "/interviews/**", "/resumes/**")
+                                                                antMatcher("/"),
+                                                                antMatcher("/error"),
+                                                                antMatcher("/public/**"),
+                                                                antMatcher("/auth/login"),
+                                                                antMatcher("/auth/register"),
+                                                                antMatcher("/auth/doRegister"),
+                                                                antMatcher("/auth/doLogin"),
+                                                                antMatcher("/css/**"),
+                                                                antMatcher("/js/**"),
+                                                                antMatcher("/images/**"),
+                                                                antMatcher("/webjars/**"))
                                                 .permitAll()
+
+                                                .requestMatchers(antMatcher("/admin/**"))
+                                                .hasRole("ADMIN")
+
+                                                .requestMatchers(antMatcher("/jobs/**"))
+                                                .hasAnyRole("ADMIN", "HR")
+
+                                                .requestMatchers(antMatcher("/applications/**"))
+                                                .hasAnyRole("ADMIN", "HR")
+
+                                                .requestMatchers(antMatcher("/ai/**"))
+                                                .hasAnyRole("ADMIN", "HR")
+
+                                                .requestMatchers(antMatcher("/candidates/**"))
+                                                .hasAnyRole("ADMIN", "HR")
+
+                                                .requestMatchers(antMatcher("/interviews/my/**"))
+                                                .hasRole("INTERVIEWER")
+
+                                                .requestMatchers(antMatcher("/interviews/**"))
+                                                .hasAnyRole("ADMIN", "HR", "INTERVIEWER")
+
+                                                .requestMatchers(antMatcher("/dashboard/**"))
+                                                .hasAnyRole("ADMIN", "HR", "INTERVIEWER")
+
+                                                .requestMatchers(antMatcher("/resumes/**"))
+                                                .hasAnyRole("ADMIN", "HR")
+
                                                 .anyRequest().authenticated())
                                 .formLogin(form -> form
                                                 .loginPage("/auth/login")
                                                 .loginProcessingUrl("/auth/doLogin")
-                                                .defaultSuccessUrl("/auth/home", true)
+                                                .successHandler(customLoginSuccessHandler)
                                                 .failureUrl("/auth/login?error=true")
                                                 .permitAll())
                                 .logout(logout -> logout

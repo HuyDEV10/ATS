@@ -1,6 +1,7 @@
 package com.dacn.ATS.module.job.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.module.job.entity.Job;
 import com.dacn.ATS.module.job.service.JobService;
 
@@ -28,7 +29,7 @@ public class JobController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // Tuỳ cách bạn lưu userId trong principal, ví dụ custom UserDetails
         // Ở đây tạm lấy name nhưng thực tế bạn cần trả về ID
-        return 1L; // TODO: thay bằng lấy từ principal
+        return CurrentUserUtil.getCurrentUserId(); // TODO: thay bằng lấy từ principal
     }
 
     private String getCurrentUserRole() {

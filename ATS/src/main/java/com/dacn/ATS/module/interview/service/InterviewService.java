@@ -16,6 +16,8 @@ public interface InterviewService {
 
     Page<InterviewRecord> pageInterviews(int page, int size, Long applicationId, Long interviewerId);
 
+    Page<InterviewRecord> pageMyInterviews(int page, int size, Long interviewerId);
+
     List<InterviewRecord> listByApplicationId(Long applicationId);
 
     boolean completeInterview(Long id, String feedback, Integer score, String recommendation);

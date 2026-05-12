@@ -1,6 +1,7 @@
 package com.dacn.ATS.module.candidate.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.module.candidate.entity.Candidate;
 import com.dacn.ATS.module.candidate.service.CandidateService;
 
@@ -23,7 +24,7 @@ public class CandidateController {
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // TODO: lấy từ custom UserDetails, hiện tại trả về 1L
-        return 1L;
+        return CurrentUserUtil.getCurrentUserId();
     }
 
     // Danh sách candidates có phân trang và tìm kiếm
