@@ -5,55 +5,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - SmartATS</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        /* Thêm một chút tùy chỉnh để căn giữa màn hình đẹp hơn */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
+            margin: 0;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
+            background:
+                linear-gradient(135deg,
+                    rgba(13, 110, 253, 0.08),
+                    rgba(13, 202, 240, 0.08)),
+                #f4f7fb;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .register-wrapper {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 430px;
+            overflow: hidden;
+            border-radius: 24px;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .register-banner {
+            background: linear-gradient(135deg, #0d6efd, #4f8cff);
+            color: white;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .register-banner h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .register-banner p {
+            font-size: 16px;
+            line-height: 1.8;
+            opacity: 0.95;
+            margin-bottom: 0;
         }
 
         .register-card {
-            max-width: 400px;
-            width: 100%;
-            padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .register-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .register-subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .form-control {
+            height: 48px;
+            border-radius: 12px;
+            border: 1px solid #dbe2ea;
+            padding: 12px 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.12);
+        }
+
+        .btn-register {
+            height: 48px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0d6efd, #4f8cff);
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.25);
+        }
+
+        .login-link {
+            color: #0d6efd;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .login-link:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+
+        @media (max-width: 900px) {
+            .register-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .register-banner {
+                display: none;
+            }
+
+            .register-card {
+                padding: 40px 28px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container register-card">
-        <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
 
-        <div th:if="${error}" th:text="${error}" class="alert alert-danger p-2 small mb-3"></div>
+    <div class="register-wrapper">
 
-        <form th:action="@{/auth/doRegister}" method="post">
-            <div class="mb-3">
-                <input type="text" name="username" class="form-control" placeholder="Tên đăng nhập" required />
+        <div class="register-banner">
+
+            <h1>SmartATS</h1>
+
+            <p>
+                Tạo tài khoản để bắt đầu trải nghiệm hệ thống tuyển dụng
+                thông minh giúp quản lý ứng viên, công việc và quy trình
+                tuyển dụng một cách hiện đại và chuyên nghiệp.
+            </p>
+
+        </div>
+
+        <div class="register-card">
+
+            <h2 class="register-title">Đăng ký tài khoản</h2>
+
+            <p class="register-subtitle">
+                Tạo tài khoản mới để truy cập hệ thống SmartATS
+            </p>
+
+            <div th:if="${error}" th:text="${error}" class="alert alert-danger p-3 small mb-4 text-center">
             </div>
-            <div class="mb-3">
-                <input type="email" name="email" class="form-control" placeholder="Email" required />
-            </div>
-            <div class="mb-3">
-                <input type="password" name="password" class="form-control" placeholder="Mật khẩu" required />
-            </div>
 
-            <button type="submit" class="btn btn-primary w-100 mt-2">Đăng ký</button>
-        </form>
+            <form th:action="@{/auth/doRegister}" method="post">
 
-        <p class="text-center mt-3 mb-0">
-            Đã có tài khoản? <a th:href="@{/auth/login}" class="text-decoration-none">Đăng nhập</a>
-        </p>
+                <div class="mb-3">
+                    <input type="text" name="username" class="form-control" placeholder="Tên đăng nhập" required />
+                </div>
+
+                <div class="mb-3">
+                    <input type="email" name="email" class="form-control" placeholder="Email" required />
+                </div>
+
+                <div class="mb-4">
+                    <input type="password" name="password" class="form-control" placeholder="Mật khẩu" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-register w-100">
+                    Đăng ký
+                </button>
+
+            </form>
+
+            <p class="text-center mt-4 mb-0 small">
+                Đã có tài khoản?
+
+                <a th:href="@{/auth/login}" class="login-link">
+                    Đăng nhập
+                </a>
+            </p>
+
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>

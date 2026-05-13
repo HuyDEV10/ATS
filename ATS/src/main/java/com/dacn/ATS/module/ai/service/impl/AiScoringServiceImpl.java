@@ -1,10 +1,18 @@
 package com.dacn.ATS.module.ai.service.impl;
 
 import com.dacn.ATS.module.ai.dto.CvScoreResult;
+import com.dacn.ATS.module.ai.client.AiClient;
+import com.dacn.ATS.module.ai.client.AiCompletionRequest;
+import com.dacn.ATS.module.ai.dto.AiScoringPrompt;
 import com.dacn.ATS.module.ai.entity.ApplicationScore;
+import com.dacn.ATS.module.ai.entity.ApplicationScoreDetail;
+import com.dacn.ATS.module.ai.mapper.ApplicationScoreDetailMapper;
 import com.dacn.ATS.module.ai.mapper.ApplicationScoreMapper;
+import com.dacn.ATS.module.ai.service.AiScoringPromptBuilder;
 import com.dacn.ATS.module.ai.service.AiScoringService;
 import com.dacn.ATS.module.ai.service.CvParserService;
+import com.dacn.ATS.module.ai.service.SkillExtractionService;
+import com.dacn.ATS.module.application.enums.ApplicationStatus;
 import com.dacn.ATS.module.application.entity.JobApplication;
 import com.dacn.ATS.module.application.mapper.JobApplicationMapper;
 import com.dacn.ATS.module.candidate.entity.Candidate;
@@ -13,6 +21,10 @@ import com.dacn.ATS.module.job.entity.Job;
 import com.dacn.ATS.module.job.mapper.JobMapper;
 import com.dacn.ATS.module.resume.entity.Resume;
 import com.dacn.ATS.module.resume.mapper.ResumeMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.dacn.ATS.module.ai.client.AiCompletionResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,8 +37,15 @@ public class AiScoringServiceImpl implements AiScoringService {
     private final JobMapper jobMapper;
     private final CandidateMapper candidateMapper;
     private final ResumeMapper resumeMapper;
+    private static final String ALGORITHM_VERSION = "RULE_WEIGHTED_V1";
+
     private final ApplicationScoreMapper scoreMapper;
+    private final ApplicationScoreDetailMapper scoreDetailMapper;
     private final CvParserService cvParserService;
+    private final SkillExtractionService skillExtractionService;
+    private final AiScoringPromptBuilder promptBuilder;
+    private final AiClient aiClient;
+    private final ObjectMapper objectMapper;
 
     public AiScoringServiceImpl(
             JobApplicationMapper applicationMapper,
@@ -34,13 +53,23 @@ public class AiScoringServiceImpl implements AiScoringService {
             CandidateMapper candidateMapper,
             ResumeMapper resumeMapper,
             ApplicationScoreMapper scoreMapper,
-            CvParserService cvParserService) {
+            ApplicationScoreDetailMapper scoreDetailMapper,
+            CvParserService cvParserService,
+            SkillExtractionService skillExtractionService,
+            AiScoringPromptBuilder promptBuilder,
+            AiClient aiClient,
+            ObjectMapper objectMapper) {
         this.applicationMapper = applicationMapper;
         this.jobMapper = jobMapper;
         this.candidateMapper = candidateMapper;
         this.resumeMapper = resumeMapper;
         this.scoreMapper = scoreMapper;
+        this.scoreDetailMapper = scoreDetailMapper;
         this.cvParserService = cvParserService;
+        this.skillExtractionService = skillExtractionService;
+        this.promptBuilder = promptBuilder;
+        this.aiClient = aiClient;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -76,8 +105,8 @@ public class AiScoringServiceImpl implements AiScoringService {
                 + safe(candidate.getExperienceYears()) + " "
                 + cvText;
 
-        Set<String> jobKeywords = extractKeywords(jobText);
-        Set<String> cvKeywords = extractKeywords(candidateText);
+        Set<String> jobKeywords = skillExtractionService.extractSkills(jobText);
+        Set<String> cvKeywords = skillExtractionService.extractSkills(candidateText);
 
         List<String> matched = new ArrayList<>();
         List<String> missing = new ArrayList<>();
@@ -126,7 +155,15 @@ public class AiScoringServiceImpl implements AiScoringService {
         result.setRecommendation(buildRecommendation(overall));
         result.setInterviewQuestions(buildInterviewQuestions(matched, missing));
 
-        saveScore(app, candidate, resume, result);
+        AiScoringPrompt prompt = promptBuilder.build(job, candidate, cvText);
+        AiCompletionResponse aiResponse = completeWithAi(prompt);
+
+        if (aiResponse.isSuccessful()) {
+            result = tryUseAiResult(result, aiResponse.getContent());
+        }
+
+        saveScore(app, candidate, resume, result, prompt.getVersion());
+        markApplicationScreened(app);
 
         return result;
     }
@@ -135,7 +172,8 @@ public class AiScoringServiceImpl implements AiScoringService {
             JobApplication app,
             Candidate candidate,
             Resume resume,
-            CvScoreResult result) {
+            CvScoreResult result,
+            String promptVersion) {
         ApplicationScore score = new ApplicationScore();
 
         score.setApplicationId(app.getId());
@@ -154,32 +192,57 @@ public class AiScoringServiceImpl implements AiScoringService {
         score.setWeaknesses(String.join("\n", result.getWeaknesses()));
         score.setRecommendation(result.getRecommendation());
         score.setInterviewQuestions(String.join("\n", result.getInterviewQuestions()));
+        score.setAlgorithmVersion(ALGORITHM_VERSION);
+        score.setPromptVersion(promptVersion);
 
         score.setScoreTime(LocalDateTime.now());
         score.setDeleted(0);
 
         scoreMapper.insert(score);
+        saveScoreDetails(score.getId(), result);
     }
 
-    private Set<String> extractKeywords(String text) {
-        Set<String> keywords = new HashSet<>();
+    private void saveScoreDetails(Long scoreId, CvScoreResult result) {
+        saveScoreDetail(scoreId, "required_and_matching_skills", 45, result.getSkillScore(),
+                String.join(", ", result.getMatchedSkills()),
+                "Đánh giá mức độ khớp giữa kỹ năng trong JD và kỹ năng/CV của ứng viên");
+        saveScoreDetail(scoreId, "keyword_coverage", 35, result.getKeywordScore(),
+                String.join(", ", result.getMissingSkills()),
+                "Đo tỷ lệ từ khóa quan trọng còn thiếu hoặc đã xuất hiện trong hồ sơ");
+        saveScoreDetail(scoreId, "experience", 20, result.getExperienceScore(),
+                "experience_score=" + result.getExperienceScore(),
+                "Điểm kinh nghiệm dựa trên số năm kinh nghiệm khai báo và thông tin trong hồ sơ");
+    }
 
-        List<String> importantSkills = List.of(
-                "java", "spring", "spring boot", "mysql", "sql",
-                "html", "css", "javascript", "react", "vue",
-                "python", "machine learning", "ai", "docker",
-                "git", "api", "rest", "security", "thymeleaf",
-                "mybatis", "database");
+    private void saveScoreDetail(Long scoreId, String criterion, int weight, int score, String evidence,
+            String explanation) {
+        ApplicationScoreDetail detail = new ApplicationScoreDetail();
+        detail.setApplicationScoreId(scoreId);
+        detail.setCriterion(criterion);
+        detail.setWeight(weight);
+        detail.setScore(score);
+        detail.setEvidence(evidence);
+        detail.setExplanation(explanation);
+        detail.setCreateTime(LocalDateTime.now());
+        detail.setDeleted(0);
+        scoreDetailMapper.insert(detail);
+    }
 
-        String lower = safe(text).toLowerCase();
+    private AiCompletionResponse completeWithAi(AiScoringPrompt prompt) {
+        AiCompletionRequest request = new AiCompletionRequest();
+        request.setSystemPrompt(prompt.getSystemPrompt());
+        request.setUserPrompt(prompt.getUserPrompt());
+        request.setResponseSchema(prompt.getResponseSchema());
+        request.setPromptVersion(prompt.getVersion());
+        return aiClient.complete(request);
+    }
 
-        for (String skill : importantSkills) {
-            if (lower.contains(skill)) {
-                keywords.add(skill);
-            }
+    private void markApplicationScreened(JobApplication app) {
+        if (ApplicationStatus.PENDING.name().equals(app.getStatus())) {
+            app.setStatus(ApplicationStatus.AI_SCREENED.name());
+            app.setUpdateTime(LocalDateTime.now());
+            applicationMapper.updateById(app);
         }
-
-        return keywords;
     }
 
     private String buildRecommendation(int score) {
@@ -213,6 +276,76 @@ public class AiScoringServiceImpl implements AiScoringService {
         }
 
         return questions;
+    }
+
+    private CvScoreResult tryUseAiResult(CvScoreResult fallback, String aiContent) {
+        if (aiContent == null || aiContent.isBlank()) {
+            return fallback;
+        }
+
+        try {
+            JsonNode root = objectMapper.readTree(extractJson(aiContent));
+
+            CvScoreResult result = new CvScoreResult();
+            result.setOverallScore(clampScore(root.path("overallScore").asInt(fallback.getOverallScore())));
+            result.setSkillScore(clampScore(root.path("skillScore").asInt(fallback.getSkillScore())));
+            result.setExperienceScore(clampScore(root.path("experienceScore").asInt(fallback.getExperienceScore())));
+            result.setKeywordScore(clampScore(root.path("keywordScore").asInt(fallback.getKeywordScore())));
+
+            result.setMatchedSkills(readStringList(root.path("matchedSkills"), fallback.getMatchedSkills()));
+            result.setMissingSkills(readStringList(root.path("missingSkills"), fallback.getMissingSkills()));
+            result.setStrengths(readStringList(root.path("strengths"), fallback.getStrengths()));
+            result.setWeaknesses(readStringList(root.path("weaknesses"), fallback.getWeaknesses()));
+            result.setInterviewQuestions(
+                    readStringList(root.path("interviewQuestions"), fallback.getInterviewQuestions()));
+
+            String recommendation = root.path("recommendation").asText(fallback.getRecommendation());
+            result.setRecommendation(recommendation);
+
+            return result;
+        } catch (Exception ex) {
+            return fallback;
+        }
+    }
+
+    private String extractJson(String value) {
+        String trimmed = value.trim();
+
+        if (trimmed.startsWith("```")) {
+            trimmed = trimmed.replaceFirst("^```json", "")
+                    .replaceFirst("^```", "")
+                    .replaceFirst("```$", "")
+                    .trim();
+        }
+
+        int start = trimmed.indexOf('{');
+        int end = trimmed.lastIndexOf('}');
+
+        if (start >= 0 && end > start) {
+            return trimmed.substring(start, end + 1);
+        }
+
+        return trimmed;
+    }
+
+    private List<String> readStringList(JsonNode node, List<String> fallback) {
+        if (node == null || !node.isArray()) {
+            return fallback == null ? List.of() : fallback;
+        }
+
+        List<String> values = new ArrayList<>();
+        for (JsonNode item : node) {
+            String text = item.asText();
+            if (text != null && !text.isBlank()) {
+                values.add(text);
+            }
+        }
+
+        return values;
+    }
+
+    private int clampScore(int value) {
+        return Math.max(0, Math.min(100, value));
     }
 
     private String safe(Object value) {

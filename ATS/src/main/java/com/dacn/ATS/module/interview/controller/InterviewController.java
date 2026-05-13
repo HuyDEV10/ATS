@@ -61,7 +61,9 @@ public class InterviewController {
 
     @PostMapping("/create")
     public String scheduleInterview(@ModelAttribute InterviewRecord interview, RedirectAttributes redirectAttributes) {
-        interview.setInterviewerId(getCurrentUserId()); // lấy từ form
+        if (interview.getInterviewerId() == null) {
+            interview.setInterviewerId(getCurrentUserId());
+        }
         interviewService.scheduleInterview(interview);
         redirectAttributes.addFlashAttribute("success", "Interview scheduled");
         return "redirect:/interviews?applicationId=" + interview.getApplicationId();

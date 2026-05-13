@@ -28,6 +28,8 @@ public class ApplicationScore {
     private String weaknesses;
     private String recommendation;
     private String interviewQuestions;
+    private String algorithmVersion;
+    private String promptVersion;
 
     private LocalDateTime scoreTime;
 

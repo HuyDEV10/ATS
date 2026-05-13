@@ -9,7 +9,8 @@ public class JobApplication {
     private Long id;
     private Long jobId; // ID từ bảng jobs
     private Long candidateId; // ID từ bảng candidates
-    private String status; // PENDING, SCREENING, INTERVIEW, OFFER, REJECTED
+    private String status; // PENDING, AI_SCREENED, SHORTLISTED, INTERVIEW_SCHEDULED, INTERVIEWED, OFFERED,
+                           // REJECTED
     private String hrNotes;
     private LocalDateTime applicationDate;
     @TableField(fill = FieldFill.INSERT)

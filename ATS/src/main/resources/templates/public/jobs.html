@@ -1,33 +1,648 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Việc làm đang tuyển</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartATS Jobs - Việc làm đang tuyển</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --ats-green: #00b14f;
+            --ats-green-dark: #009643;
+            --ats-green-soft: #e9fff3;
+            --ats-ink: #172033;
+            --ats-muted: #667085;
+            --ats-border: #e8eef3;
+            --ats-bg: #f3f8f6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--ats-bg);
+            color: var(--ats-ink);
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .topbar {
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom: 1px solid rgba(232, 238, 243, 0.9);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .brand-mark {
+            align-items: center;
+            color: var(--ats-green-dark);
+            display: inline-flex;
+            font-size: 1.35rem;
+            font-weight: 800;
+            gap: .55rem;
+            letter-spacing: -.02em;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            align-items: center;
+            background: linear-gradient(135deg, var(--ats-green), #36d399);
+            border-radius: 14px;
+            box-shadow: 0 12px 24px rgba(0, 177, 79, .22);
+            color: #fff;
+            display: inline-flex;
+            height: 42px;
+            justify-content: center;
+            width: 42px;
+        }
+
+        .nav-pill {
+            border-radius: 999px;
+            color: var(--ats-muted);
+            font-weight: 700;
+            padding: .65rem 1rem;
+            text-decoration: none;
+        }
+
+        .nav-pill:hover,
+        .nav-pill.active {
+            background: var(--ats-green-soft);
+            color: var(--ats-green-dark);
+        }
+
+        .hero {
+            background:
+                radial-gradient(circle at top left, rgba(54, 211, 153, .34), transparent 32%),
+                linear-gradient(135deg, #06281c 0%, #075f3a 48%, #00b14f 100%);
+            border-radius: 0 0 34px 34px;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero::after {
+            background: rgba(255, 255, 255, .12);
+            border-radius: 999px;
+            content: "";
+            height: 360px;
+            position: absolute;
+            right: -110px;
+            top: -95px;
+            width: 360px;
+        }
+
+        .hero-content {
+            padding: 4.5rem 0 5.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            align-items: center;
+            background: rgba(255, 255, 255, .15);
+            border: 1px solid rgba(255, 255, 255, .25);
+            border-radius: 999px;
+            display: inline-flex;
+            font-weight: 700;
+            gap: .5rem;
+            padding: .55rem .9rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.3rem, 5vw, 4.6rem);
+            font-weight: 900;
+            letter-spacing: -.06em;
+            line-height: .98;
+            margin: 1.25rem 0 1rem;
+            max-width: 780px;
+        }
+
+        .hero p {
+            color: rgba(255, 255, 255, .86);
+            font-size: 1.08rem;
+            max-width: 670px;
+        }
+
+        .search-panel {
+            background: #fff;
+            border: 1px solid rgba(255, 255, 255, .75);
+            border-radius: 24px;
+            box-shadow: 0 24px 70px rgba(5, 57, 35, .24);
+            color: var(--ats-ink);
+            margin-top: 2rem;
+            padding: .9rem;
+        }
+
+        .search-input-wrap {
+            align-items: center;
+            background: #f7faf9;
+            border: 1px solid #edf2f0;
+            border-radius: 18px;
+            display: flex;
+            gap: .75rem;
+            min-height: 58px;
+            padding: 0 1rem;
+        }
+
+        .search-input-wrap i {
+            color: var(--ats-green);
+            font-size: 1.15rem;
+        }
+
+        .search-input-wrap input,
+        .search-input-wrap select {
+            background: transparent;
+            border: 0;
+            box-shadow: none !important;
+            color: var(--ats-ink);
+            font-weight: 600;
+            outline: 0;
+            width: 100%;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, var(--ats-green), #13c96b);
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 16px 32px rgba(0, 177, 79, .28);
+            color: #fff;
+            font-weight: 800;
+            min-height: 58px;
+            width: 100%;
+        }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, var(--ats-green-dark), var(--ats-green));
+            color: #fff;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 20px;
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, .78);
+            font-size: .9rem;
+            font-weight: 600;
+            margin-top: .35rem;
+        }
+
+        .section-shell {
+            margin-top: -2.4rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        .filter-card,
+        .job-card,
+        .side-card {
+            background: #fff;
+            border: 1px solid var(--ats-border);
+            border-radius: 24px;
+            box-shadow: 0 16px 48px rgba(23, 32, 51, .07);
+        }
+
+        .filter-card {
+            padding: 1.2rem;
+        }
+
+        .chip {
+            background: #f5faf7;
+            border: 1px solid #e3f3ea;
+            border-radius: 999px;
+            color: #286044;
+            display: inline-flex;
+            font-size: .88rem;
+            font-weight: 700;
+            gap: .4rem;
+            padding: .52rem .85rem;
+        }
+
+        .job-card {
+            padding: 1.25rem;
+            transition: .22s ease;
+        }
+
+        .job-card:hover {
+            border-color: rgba(0, 177, 79, .45);
+            box-shadow: 0 20px 54px rgba(0, 177, 79, .13);
+            transform: translateY(-4px);
+        }
+
+        .company-logo {
+            align-items: center;
+            background: linear-gradient(135deg, var(--ats-green-soft), #fff);
+            border: 1px solid #d9f5e6;
+            border-radius: 18px;
+            color: var(--ats-green-dark);
+            display: flex;
+            flex: 0 0 auto;
+            font-size: 1.45rem;
+            height: 62px;
+            justify-content: center;
+            width: 62px;
+        }
+
+        .job-title {
+            color: var(--ats-ink);
+            display: block;
+            font-size: 1.08rem;
+            font-weight: 850;
+            letter-spacing: -.015em;
+            line-height: 1.25;
+            text-decoration: none;
+        }
+
+        .job-title:hover {
+            color: var(--ats-green-dark);
+        }
+
+        .line-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .job-meta {
+            color: var(--ats-muted);
+            font-size: .92rem;
+            font-weight: 600;
+        }
+
+        .job-tag {
+            align-items: center;
+            background: #f6f8fb;
+            border-radius: 999px;
+            color: #3f4b5f;
+            display: inline-flex;
+            font-size: .83rem;
+            font-weight: 750;
+            gap: .35rem;
+            padding: .45rem .7rem;
+        }
+
+        .salary-tag {
+            background: #eafff3;
+            color: var(--ats-green-dark);
+        }
+
+        .btn-apply {
+            background: var(--ats-green);
+            border: 0;
+            border-radius: 14px;
+            color: #fff;
+            font-weight: 800;
+            padding: .72rem 1rem;
+        }
+
+        .btn-apply:hover {
+            background: var(--ats-green-dark);
+            color: #fff;
+        }
+
+        .side-card {
+            padding: 1.25rem;
+        }
+
+        .side-title {
+            font-size: 1rem;
+            font-weight: 850;
+            letter-spacing: -.01em;
+        }
+
+        .progress-soft {
+            background: #e9f7ef;
+            border-radius: 999px;
+            height: 9px;
+            overflow: hidden;
+        }
+
+        .progress-soft span {
+            background: linear-gradient(90deg, var(--ats-green), #35d08a);
+            display: block;
+            height: 100%;
+        }
+
+        .empty-state {
+            background: #fff;
+            border: 1px dashed #cde8d8;
+            border-radius: 28px;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            align-items: center;
+            background: var(--ats-green-soft);
+            border-radius: 50%;
+            color: var(--ats-green-dark);
+            display: inline-flex;
+            font-size: 2rem;
+            height: 82px;
+            justify-content: center;
+            margin-bottom: 1rem;
+            width: 82px;
+        }
+
+        .footer-cta {
+            background: linear-gradient(135deg, #ffffff, #ecfff4);
+            border: 1px solid #dcf6e7;
+            border-radius: 28px;
+            margin: 3rem 0;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                padding: 3rem 0 4.4rem;
+            }
+
+            .section-shell {
+                margin-top: -1.7rem;
+            }
+
+            .job-card {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container py-4">
+    <header class="topbar">
+        <nav class="container d-flex align-items-center justify-content-between py-3">
+            <a href="/public/jobs" class="brand-mark">
+                <span class="brand-icon"><i class="bi bi-stars"></i></span>
+                SmartATS Jobs
+            </a>
+            <div class="d-none d-md-flex align-items-center gap-2">
+                <a href="/public/jobs" class="nav-pill active">Việc làm</a>
+                <a href="/auth/login" class="nav-pill">Đăng nhập</a>
+                <a href="/auth/register" class="btn btn-success rounded-pill px-4 fw-bold">Đăng ký</a>
+            </div>
+        </nav>
+    </header>
 
-        <h2>Việc làm đang tuyển</h2>
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="hero-badge"><i class="bi bi-shield-check"></i> Nền tảng tuyển dụng thông minh tích hợp
+                        AI</span>
+                    <h1>Tìm đúng công việc, ứng tuyển nhanh với SmartATS</h1>
+                    <p>Khám phá các vị trí đang tuyển, nộp CV trực tuyến và để hệ thống AI hỗ trợ phân tích độ phù hợp
+                        của hồ sơ với công việc.</p>
 
-        <div class="row">
-            <div class="col-md-4 mb-3" th:each="job : ${jobs}">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 th:text="${job.title}"></h5>
-                        <p th:text="${job.location}"></p>
-                        <p th:text="${job.salaryRange}"></p>
+                    <div class="search-panel">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-lg-5">
+                                <div class="search-input-wrap">
+                                    <i class="bi bi-search"></i>
+                                    <input id="keywordInput" type="text"
+                                        placeholder="Tên công việc, kỹ năng, phòng ban...">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="search-input-wrap">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <select id="locationInput" aria-label="Lọc theo địa điểm">
+                                        <option value="">Tất cả địa điểm</option>
+                                        <option th:each="job : ${jobs}"
+                                            th:if="${job.location != null and !#strings.isEmpty(job.location)}"
+                                            th:value="${job.location}" th:text="${job.location}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <button type="button" class="btn btn-search" onclick="filterJobs()">
+                                    <i class="bi bi-lightning-charge-fill me-1"></i> Tìm việc ngay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        <a th:href="@{/public/jobs/{id}(id=${job.id})}" class="btn btn-primary">
-                            Xem và ứng tuyển
-                        </a>
+                <div class="col-lg-4">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="stat-card">
+                                <div class="stat-number" th:text="${#lists.size(jobs)}">0</div>
+                                <div class="stat-label">Việc làm đang mở</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-card">
+                                <div class="stat-number">AI</div>
+                                <div class="stat-label">Chấm CV tự động</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="stat-card d-flex align-items-center gap-3">
+                                <i class="bi bi-graph-up-arrow fs-2"></i>
+                                <div>
+                                    <div class="fw-bold">Ứng tuyển an toàn, theo dõi minh bạch</div>
+                                    <div class="stat-label">CV được kiểm tra định dạng và lưu vào CV Bank</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-    </div>
+    <main class="container section-shell">
+        <section class="filter-card mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div>
+                    <h2 class="h4 fw-black mb-1">Việc làm tốt nhất hôm nay</h2>
+                    <div class="text-muted fw-semibold">Gợi ý các vị trí phù hợp để bạn ứng tuyển nhanh</div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="chip"><i class="bi bi-cpu"></i> AI Screening</span>
+                    <span class="chip"><i class="bi bi-file-earmark-check"></i> CV Bank</span>
+                    <span class="chip"><i class="bi bi-patch-check"></i> Skill Verification</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="fw-bold text-muted">
+                        <span id="jobCounter" th:text="${#lists.size(jobs)}">0</span> kết quả phù hợp
+                    </div>
+                    <div class="small text-muted">Sắp xếp theo: <strong>Mới nhất</strong></div>
+                </div>
+
+                <div id="jobList" class="d-grid gap-3">
+                    <article class="job-card" th:each="job : ${jobs}"
+                        th:attr="data-title=${#strings.toLowerCase(job.title)},data-department=${#strings.toLowerCase(job.department)},data-location=${#strings.toLowerCase(job.location)}">
+                        <div class="d-flex gap-3">
+                            <div class="company-logo">
+                                <i class="bi bi-building-check"></i>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                                    <div>
+                                        <a class="job-title" th:href="@{/public/jobs/{id}(id=${job.id})}"
+                                            th:text="${job.title}">Java Developer</a>
+                                        <div class="job-meta mt-1">
+                                            <i class="bi bi-briefcase me-1"></i>
+                                            <span
+                                                th:text="${job.department != null && !#strings.isEmpty(job.department) ? job.department : 'Phòng ban đang cập nhật'}">IT</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="job-tag salary-tag">
+                                            <i class="bi bi-cash-coin"></i>
+                                            <span
+                                                th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Lương thỏa thuận'}">Lương
+                                                thỏa thuận</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p class="text-muted mt-3 mb-3 line-clamp" th:text="${job.description}">Mô tả công việc
+                                    ngắn gọn...</p>
+
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="job-tag">
+                                            <i class="bi bi-geo-alt"></i>
+                                            <span
+                                                th:text="${job.location != null && !#strings.isEmpty(job.location) ? job.location : 'Linh hoạt'}">Hà
+                                                Nội</span>
+                                        </span>
+                                        <span class="job-tag"><i class="bi bi-clock-history"></i> Đang tuyển</span>
+                                        <span class="job-tag"><i class="bi bi-stars"></i> AI hỗ trợ lọc CV</span>
+                                    </div>
+                                    <a th:href="@{/public/jobs/{id}(id=${job.id})}" class="btn btn-apply">
+                                        Xem và ứng tuyển <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div id="emptyState" class="empty-state d-none">
+                    <div class="empty-icon"><i class="bi bi-search-heart"></i></div>
+                    <h3 class="h5 fw-bold">Chưa tìm thấy công việc phù hợp</h3>
+                    <p class="text-muted mb-0">Hãy thử từ khóa khác hoặc chọn lại địa điểm.</p>
+                </div>
+
+                <div th:if="${#lists.isEmpty(jobs)}" class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-briefcase"></i></div>
+                    <h3 class="h5 fw-bold">Chưa có việc làm đang tuyển</h3>
+                    <p class="text-muted mb-0">Vui lòng quay lại sau hoặc liên hệ nhà tuyển dụng để biết thêm thông tin.
+                    </p>
+                </div>
+            </div>
+
+            <aside class="col-lg-4">
+                <div class="side-card mb-3">
+                    <div class="side-title mb-3"><i class="bi bi-activity text-success me-2"></i>Thị trường việc làm
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted fw-semibold">Việc làm đang tuyển</span>
+                        <strong th:text="${#lists.size(jobs)}">0</strong>
+                    </div>
+                    <div class="progress-soft mb-3"><span style="width: 78%"></span></div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted fw-semibold">CV được AI hỗ trợ</span>
+                        <strong>100%</strong>
+                    </div>
+                    <div class="progress-soft"><span style="width: 100%"></span></div>
+                </div>
+
+                <div class="side-card mb-3">
+                    <div class="side-title mb-3"><i class="bi bi-magic text-success me-2"></i>Lợi thế khi ứng tuyển
+                    </div>
+                    <div class="d-grid gap-3">
+                        <div class="d-flex gap-3">
+                            <span class="chip"><i class="bi bi-upload"></i></span>
+                            <div>
+                                <div class="fw-bold">Nộp CV trực tuyến</div>
+                                <div class="small text-muted">Ứng viên gửi hồ sơ và kỹ năng trong một form.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <span class="chip"><i class="bi bi-robot"></i></span>
+                            <div>
+                                <div class="fw-bold">AI đánh giá phù hợp</div>
+                                <div class="small text-muted">Hệ thống phân tích CV so với yêu cầu công việc.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <span class="chip"><i class="bi bi-shield-check"></i></span>
+                            <div>
+                                <div class="fw-bold">Upload an toàn hơn</div>
+                                <div class="small text-muted">CV được kiểm tra định dạng trước khi lưu.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-cta">
+                    <div class="side-title mb-2">Bạn đã sẵn sàng ứng tuyển?</div>
+                    <p class="text-muted mb-3">Tạo tài khoản để theo dõi hồ sơ, quản lý CV và cập nhật trạng thái ứng
+                        tuyển.</p>
+                    <a href="/auth/register" class="btn btn-success rounded-pill px-4 fw-bold">Đăng ký ngay</a>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        function normalize(value) {
+            return (value || '').toString().toLowerCase().trim();
+        }
+
+        function filterJobs() {
+            const keyword = normalize(document.getElementById('keywordInput').value);
+            const location = normalize(document.getElementById('locationInput').value);
+            const cards = document.querySelectorAll('#jobList .job-card');
+            let visible = 0;
+
+            cards.forEach(card => {
+                const haystack = [card.dataset.title, card.dataset.department, card.dataset.location].join(' ');
+                const matchKeyword = !keyword || normalize(haystack).includes(keyword);
+                const matchLocation = !location || normalize(card.dataset.location).includes(location);
+                const show = matchKeyword && matchLocation;
+                card.classList.toggle('d-none', !show);
+                if (show) {
+                    visible++;
+                }
+            });
+
+            document.getElementById('jobCounter').innerText = visible;
+            document.getElementById('emptyState').classList.toggle('d-none', visible !== 0);
+        }
+
+        document.getElementById('keywordInput').addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                filterJobs();
+            }
+        });
+        document.getElementById('locationInput').addEventListener('change', filterJobs);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

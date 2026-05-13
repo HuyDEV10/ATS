@@ -8,6 +8,8 @@ import com.dacn.ATS.module.resume.entity.Resume;
 import com.dacn.ATS.module.resume.mapper.ResumeMapper;
 import com.dacn.ATS.module.resume.service.ResumeService;
 import com.dacn.ATS.module.resume.util.FileValidationUtil;
+import com.dacn.ATS.module.securityscan.dto.FileScanResult;
+import com.dacn.ATS.module.securityscan.service.FileSecurityScanner;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,17 +31,18 @@ public class ResumeServiceImpl implements ResumeService {
     private String uploadDir;
 
     private final ResumeMapper resumeMapper;
+    private final FileSecurityScanner fileSecurityScanner;
 
-    public ResumeServiceImpl(ResumeMapper resumeMapper) {
+    public ResumeServiceImpl(ResumeMapper resumeMapper, FileSecurityScanner fileSecurityScanner) {
         this.resumeMapper = resumeMapper;
+        this.fileSecurityScanner = fileSecurityScanner;
     }
 
     @Override
     public Resume uploadResume(MultipartFile file, Long userId) throws IOException {
-        // Kiểm tra file bằng FileValidationUtil
-        if (!FileValidationUtil.isValidFile(file)) {
-            throw new BusinessException(ResultCodeEnum.BAD_REQUEST,
-                    "Invalid file type or size (max 10MB, PDF/DOC/DOCX only)");
+        FileScanResult scanResult = fileSecurityScanner.scan(file);
+        if (!scanResult.isSafe()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, scanResult.getMessage());
         }
 
         // Tính MD5

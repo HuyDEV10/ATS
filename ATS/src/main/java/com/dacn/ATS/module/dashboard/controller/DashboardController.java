@@ -16,19 +16,25 @@ public class DashboardController {
 
     @GetMapping("/dashboard/admin")
     public String adminDashboard(Model model) {
-        model.addAttribute("stats", dashboardService.getStats());
+        addDashboardData(model);
         return "dashboard/admin";
     }
 
     @GetMapping("/dashboard/hr")
     public String hrDashboard(Model model) {
-        model.addAttribute("stats", dashboardService.getStats());
+        addDashboardData(model);
         return "dashboard/hr";
     }
 
     @GetMapping("/dashboard/interviewer")
     public String interviewerDashboard(Model model) {
-        model.addAttribute("stats", dashboardService.getStats());
+        addDashboardData(model);
         return "dashboard/interviewer";
+    }
+
+    private void addDashboardData(Model model) {
+        model.addAttribute("stats", dashboardService.getStats());
+        model.addAttribute("funnel", dashboardService.getRecruitmentFunnel());
+        model.addAttribute("scoreDistribution", dashboardService.getAiScoreDistribution());
     }
 }

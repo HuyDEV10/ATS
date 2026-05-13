@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dacn.ATS.common.enums.ResultCodeEnum;
 import com.dacn.ATS.exception.BusinessException;
 import com.dacn.ATS.module.application.entity.JobApplication;
+import com.dacn.ATS.module.application.enums.ApplicationStatus;
+import com.dacn.ATS.module.application.enums.ApplicationStatusTransitionValidator;
 import com.dacn.ATS.module.application.mapper.JobApplicationMapper;
 import com.dacn.ATS.module.application.service.JobApplicationService;
 import com.dacn.ATS.module.candidate.entity.Candidate;
@@ -44,7 +46,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             throw new BusinessException(ResultCodeEnum.NOT_FOUND, "Candidate not found");
         }
         application.setId(null);
-        application.setStatus("PENDING");
+        application.setStatus(ApplicationStatus.PENDING.name());
         application.setApplicationDate(LocalDateTime.now());
         application.setCreateTime(LocalDateTime.now());
         application.setUpdateTime(LocalDateTime.now());
@@ -116,6 +118,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         JobApplication app = getApplicationById(id);
         if (app == null)
             return false;
+        ApplicationStatusTransitionValidator.validate(app.getStatus(), newStatus);
         app.setStatus(newStatus);
         if (hrNotes != null) {
             app.setHrNotes(hrNotes);

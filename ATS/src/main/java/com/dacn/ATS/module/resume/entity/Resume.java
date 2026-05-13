@@ -15,6 +15,9 @@ public class Resume {
     private Long uploadedBy;
     private LocalDateTime uploadTime;
     private String parseStatus; // PENDING, PARSED, FAILED
+    private String parsedText;
+    private String parseError;
+    private LocalDateTime parsedAt;
     @TableLogic
     private Integer deleted;
 }
