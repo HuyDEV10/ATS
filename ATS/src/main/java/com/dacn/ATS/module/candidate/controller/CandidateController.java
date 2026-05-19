@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.module.candidate.entity.Candidate;
 import com.dacn.ATS.module.candidate.service.CandidateService;
+import com.dacn.ATS.module.verification.service.VerificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,9 @@ public class CandidateController {
 
     @Autowired
     private CandidateService candidateService;
+
+    @Autowired
+    private VerificationService verificationService;
 
     // Lấy userId hiện tại (tạm thời, sẽ thay bằng lấy từ principal)
     private Long getCurrentUserId() {
@@ -84,6 +88,7 @@ public class CandidateController {
     public String viewCandidate(@PathVariable Long id, Model model) {
         Candidate candidate = candidateService.getCandidateById(id);
         model.addAttribute("candidate", candidate);
+        model.addAttribute("verifiedSkillProfile", verificationService.buildVerifiedSkillProfile(id));
         return "candidate/view";
     }
 }

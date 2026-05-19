@@ -15,7 +15,9 @@ public class RuleBasedSkillExtractionService implements SkillExtractionService {
             "python", "machine learning", "ai", "docker",
             "git", "api", "rest", "security", "thymeleaf",
             "mybatis", "database", "testing", "microservices",
-            "aws", "linux", "ci/cd", "kubernetes");
+            "aws", "linux", "ci/cd", "kubernetes", "typescript", "node.js",
+            "angular", "github", "hackerrank", "coursera", "udemy", "linkedin learning",
+            "java spring boot", "reactjs", "devops", "unit test", "integration test");
 
     @Override
     public Set<String> extractSkills(String text) {

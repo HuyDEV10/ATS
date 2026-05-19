@@ -64,7 +64,9 @@ public class SecurityConfig {
 
                                                 .requestMatchers(antMatcher("/candidates/**"))
                                                 .hasAnyRole("ADMIN", "HR")
-
+                                                .requestMatchers(antMatcher("/verifications/**"),
+                                                                antMatcher("/api/verifications/**"))
+                                                .hasAnyRole("ADMIN", "HR")
                                                 .requestMatchers(antMatcher("/interviews/my/**"))
                                                 .hasRole("INTERVIEWER")
 

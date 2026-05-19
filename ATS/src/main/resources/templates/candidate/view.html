@@ -114,6 +114,27 @@
             line-height: 1.8;
         }
 
+        .verified-skill-card {
+            background: linear-gradient(135deg, #f0fdf4, #eef6ff);
+            border: 1px solid #dbeafe;
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .verified-skill-pill {
+            background: white;
+            border: 1px solid #dbeafe;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #0f766e;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            margin: 0 6px 8px 0;
+        }
+
         .badge-exp {
             background: rgba(255, 255, 255, 0.18);
             color: white;
@@ -335,6 +356,46 @@
                                     <div th:text="${candidate.skills}" class="text-muted">
 
                                         Kỹ năng chưa cập nhật
+
+                                    </div>
+                                    <div class="verified-skill-card mb-4">
+
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="section-title small mb-0">
+                                                <i class="bi bi-patch-check-fill me-2"></i>
+                                                Verified Skills
+                                            </div>
+                                            <a th:href="@{/verifications/candidate/{id}(id=${candidate.id})}"
+                                                class="btn btn-sm btn-outline-primary rounded-pill fw-bold">
+                                                Quản lý xác thực
+                                            </a>
+                                        </div>
+
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <div class="label-custom mb-1">Confidence TB</div>
+                                                <div class="value-custom mb-0 text-success"
+                                                    th:text="${verifiedSkillProfile.averageConfidence + '%'}">0%</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="label-custom mb-1">Minh chứng</div>
+                                                <div class="value-custom mb-0"
+                                                    th:text="${verifiedSkillProfile.totalEvidence}">0</div>
+                                            </div>
+                                        </div>
+
+                                        <div th:if="${#lists.isEmpty(verifiedSkillProfile.skills)}"
+                                            class="text-muted small">
+                                            Chưa có kỹ năng được xác thực trực tuyến.
+                                        </div>
+                                        <div th:unless="${#lists.isEmpty(verifiedSkillProfile.skills)}">
+                                            <span th:each="skill, iter : ${verifiedSkillProfile.skills}"
+                                                th:if="${iter.index < 5}" class="verified-skill-pill">
+                                                <i class="bi bi-shield-check"></i>
+                                                <span class="text-capitalize" th:text="${skill.skillName}">Java</span>
+                                                <span th:text="${skill.confidenceScore + '%'}">92%</span>
+                                            </span>
+                                        </div>
 
                                     </div>
 

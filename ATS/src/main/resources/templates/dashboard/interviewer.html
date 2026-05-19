@@ -3,99 +3,524 @@
 
 <head>
     <title>Interviewer Dashboard</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #312e81;
+            --accent: #06b6d4;
+            --sidebar-bg: #111827;
+            --sidebar-muted: #a5b4fc;
+            --page-bg: #eef2ff;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e0e7ff;
+        }
+
         body {
-            background: #f4f7fb;
+            margin: 0;
+            background: var(--page-bg);
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            color: #2d3748;
+            color: var(--text);
         }
 
-        .dashboard-wrapper {
+        .dashboard-shell {
             min-height: 100vh;
+            display: grid;
+            grid-template-columns: 280px 1fr;
         }
 
-        .dashboard-header {
-            background: linear-gradient(135deg, #0d6efd, #5a8dff);
-            border-radius: 20px;
-            padding: 32px;
-            color: white;
-            box-shadow: 0 12px 30px rgba(13, 110, 253, 0.18);
+        .sidebar {
+            background: linear-gradient(180deg, var(--sidebar-bg), #1e1b4b 58%, #0e7490);
+            color: #fff;
+            padding: 28px 22px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: 12px 0 34px rgba(30, 27, 75, 0.18);
         }
 
-        .dashboard-header h2 {
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+            margin-bottom: 24px;
+        }
+
+        .brand-mark {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            font-size: 22px;
+        }
+
+        .brand small {
+            color: var(--sidebar-muted);
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            font-weight: 850;
+            margin: 0;
+        }
+
+        .nav-section-label {
+            color: var(--sidebar-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            margin: 0 0 12px 12px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            gap: 8px;
+        }
+
+        .sidebar-link {
+            color: #e0e7ff;
+            text-decoration: none;
+            border-radius: 16px;
+            padding: 13px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.22s ease;
+        }
+
+        .sidebar-link span:first-child {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 750;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            color: #fff;
+            background: rgba(79, 70, 229, 0.26);
+            box-shadow: inset 3px 0 0 #67e8f9;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            left: 22px;
+            right: 22px;
+            bottom: 24px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0f2fe;
+            font-size: 13px;
+        }
+
+        .main-content {
+            padding: 32px;
+        }
+
+        .hero-card {
+            background: radial-gradient(circle at top right, rgba(6, 182, 212, 0.36), transparent 34%),
+                linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: #fff;
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 24px 60px rgba(79, 70, 229, 0.23);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .hero-card h2 {
+            font-size: 34px;
+            font-weight: 850;
             margin-bottom: 8px;
         }
 
-        .dashboard-header p {
-            margin-bottom: 0;
-            opacity: 0.9;
+        .hero-card p {
+            color: rgba(255, 255, 255, 0.88);
+            margin: 0;
+            max-width: 680px;
         }
 
-        .interview-card {
-            margin-top: 24px;
-            border: none;
-            border-radius: 20px;
-            padding: 32px;
-            background: white;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
-            transition: all 0.25s ease;
+        .hero-card .btn {
+            border-radius: 999px;
+            font-weight: 800;
+            padding: 11px 18px;
+            white-space: nowrap;
         }
 
-        .interview-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+        .focus-card,
+        .panel-card,
+        .review-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 14px 40px rgba(49, 46, 129, 0.07);
         }
 
-        .interview-card h4 {
-            font-weight: 700;
-            margin-bottom: 14px;
-            color: #0d6efd;
+        .focus-card {
+            padding: 22px;
+            height: 100%;
         }
 
-        .interview-card p {
-            color: #718096;
-            margin-bottom: 24px;
-            font-size: 15px;
+        .focus-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: #e0e7ff;
+            color: var(--primary-dark);
+            font-size: 22px;
+            margin-bottom: 16px;
         }
 
-        .interview-card .btn {
-            border-radius: 12px;
-            padding: 12px 22px;
-            font-weight: 600;
+        .focus-card h3 {
+            color: var(--primary-dark);
+            font-size: 34px;
+            font-weight: 850;
+            margin: 0;
+        }
+
+        .focus-card p {
+            color: var(--muted);
+            font-weight: 750;
+            margin-bottom: 6px;
+        }
+
+        .panel-card {
+            padding: 24px;
+            height: 100%;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .panel-title h4 {
+            font-weight: 850;
+            margin: 0;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 72px 1fr auto;
+            gap: 16px;
+            align-items: center;
+            padding: 16px;
+            border-radius: 18px;
+            background: #f8fafc;
+            margin-bottom: 12px;
+        }
+
+        .timeline-time {
+            color: var(--primary);
+            font-weight: 850;
+        }
+
+        .timeline-item strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .review-card {
+            padding: 18px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .review-card .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: #cffafe;
+            color: #0e7490;
+            font-weight: 850;
+        }
+
+        .feedback-note {
+            padding: 16px;
+            border-radius: 18px;
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                height: auto;
+            }
+
+            .sidebar-footer {
+                position: static;
+                margin-top: 22px;
+            }
+
+            .hero-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .timeline-item {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">🎙️</div>
+                <div>
+                    <small>Interview Desk</small>
+                    <h1>Interviewer</h1>
+                </div>
+            </div>
 
-    <div class="container py-4 dashboard-wrapper">
+            <p class="nav-section-label">Sidebar dashboard Interviews</p>
 
-        <div class="dashboard-header">
-            <h2>Interviewer Dashboard</h2>
-            <p>Quản lý lịch phỏng vấn và theo dõi ứng viên được phân công</p>
-        </div>
+            <nav class="sidebar-nav">
+                <a class="sidebar-link active" href="#today-interviews">
+                    <span>📌 Today Interviews</span><span>›</span>
+                </a>
+                <a class="sidebar-link" href="#schedule">
+                    <span>🗓️ Schedule</span><span>›</span>
+                </a>
+                <a class="sidebar-link" href="#candidate-reviews">
+                    <span>🧑‍💼 Candidate Reviews</span><span>›</span>
+                </a>
+                <a class="sidebar-link" href="#feedback">
+                    <span>📝 Feedback</span><span>›</span>
+                </a>
+                <a class="sidebar-link" href="#history">
+                    <span>📚 History</span><span>›</span>
+                </a>
+            </nav>
 
-        <div class="card interview-card">
+            <div class="sidebar-footer">
+                <strong>Review guideline</strong>
+                <div class="mt-2">
+                    Chuẩn bị câu hỏi, ghi feedback có cấu trúc và hoàn tất đánh giá ngay sau buổi phỏng vấn.
+                </div>
+            </div>
+        </aside>
 
-            <h4>Lịch phỏng vấn</h4>
+        <main class="main-content">
+            <section class="hero-card">
+                <div>
+                    <h2>Interviewer Dashboard</h2>
+                    <p>
+                        Bảng điều phối cho interviewer: xem lịch hôm nay, lịch sắp tới,
+                        hồ sơ cần review, nhập feedback và tra cứu lịch sử đánh giá.
+                    </p>
+                </div>
 
-            <p>
-                Bạn có thể xem danh sách các buổi phỏng vấn được HR phân công,
-                theo dõi lịch trình và chuẩn bị đánh giá ứng viên.
-            </p>
+                <a href="/interviews/my" class="btn btn-light">
+                    View My Interviews
+                </a>
+            </section>
 
-            <a href="/interviews/my" class="btn btn-primary">
-                Xem lịch phỏng vấn của tôi
-            </a>
+            <section class="row g-4 mt-1" id="today-interviews">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="focus-card">
+                        <div class="focus-icon">📌</div>
+                        <p>Today Interviews</p>
+                        <h3 th:text="${stats.scheduledInterviews}">0</h3>
+                        <small class="text-muted">Scheduled interviews in queue</small>
+                    </div>
+                </div>
 
-        </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="focus-card">
+                        <div class="focus-icon">📝</div>
+                        <p>Feedback</p>
+                        <h3 th:text="${funnel.interviewed}">0</h3>
+                        <small class="text-muted">Interviewed candidates to summarize</small>
+                    </div>
+                </div>
 
+                <div class="col-sm-6 col-xl-3">
+                    <div class="focus-card">
+                        <div class="focus-icon">✅</div>
+                        <p>Recommended</p>
+                        <h3 th:text="${funnel.offered}">0</h3>
+                        <small class="text-muted">Candidates moving forward</small>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="focus-card">
+                        <div class="focus-icon">📚</div>
+                        <p>History</p>
+                        <h3 th:text="${stats.totalInterviews}">0</h3>
+                        <small class="text-muted">Total interview records</small>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row g-4 mt-1">
+                <div class="col-xl-7" id="schedule">
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <h4>Schedule</h4>
+                            <span class="badge text-bg-primary">Today plan</span>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-time">09:00</div>
+                            <div>
+                                <strong>Technical Interview</strong>
+                                <span class="text-muted">
+                                    Review CV, project depth and role fit before joining.
+                                </span>
+                            </div>
+                            <a class="btn btn-sm btn-outline-primary rounded-pill" href="/interviews/my">
+                                Open
+                            </a>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-time">13:30</div>
+                            <div>
+                                <strong>Culture & Communication</strong>
+                                <span class="text-muted">
+                                    Validate teamwork, communication and problem-solving signals.
+                                </span>
+                            </div>
+                            <a class="btn btn-sm btn-outline-primary rounded-pill" href="/interviews/my">
+                                Open
+                            </a>
+                        </div>
+
+                        <div class="timeline-item mb-0">
+                            <div class="timeline-time">16:00</div>
+                            <div>
+                                <strong>Feedback Wrap-up</strong>
+                                <span class="text-muted">
+                                    Complete scorecards and recommendation notes for HR.
+                                </span>
+                            </div>
+                            <a class="btn btn-sm btn-primary rounded-pill" href="#feedback">
+                                Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5" id="feedback">
+                    <div class="panel-card">
+                        <div class="panel-title">
+                            <h4>Feedback</h4>
+                            <span class="badge text-bg-light">Scorecard</span>
+                        </div>
+
+                        <div class="feedback-note">
+                            <strong>1. Evidence first</strong>
+                            <div class="text-muted">
+                                Ghi nhận dẫn chứng cụ thể từ câu trả lời, bài test hoặc dự án.
+                            </div>
+                        </div>
+
+                        <div class="feedback-note">
+                            <strong>2. Role-fit decision</strong>
+                            <div class="text-muted">
+                                Kết luận rõ: recommend, hold, hoặc reject cùng lý do.
+                            </div>
+                        </div>
+
+                        <div class="feedback-note mb-0">
+                            <strong>3. Next action</strong>
+                            <div class="text-muted">
+                                Đề xuất vòng tiếp theo, câu hỏi bổ sung hoặc điều kiện offer.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row g-4 mt-1" id="candidate-reviews">
+                <div class="col-md-4">
+                    <div class="review-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar">CV</div>
+                            <div>
+                                <strong>Candidate Reviews</strong>
+                                <div class="text-muted">CV, skills and notes</div>
+                            </div>
+                        </div>
+
+                        <p class="text-muted mb-0">
+                            Chuẩn hóa phần review theo technical skills, communication và seniority signals.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="review-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar">AI</div>
+                            <div>
+                                <strong>AI Context</strong>
+                                <div class="text-muted">Strong matches</div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-primary mb-0" th:text="${scoreDistribution.strongMatches}">0</h3>
+
+                        <p class="text-muted mb-0">
+                            Dùng AI matching như thông tin tham khảo, quyết định cuối dựa trên phỏng vấn.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4" id="history">
+                    <div class="review-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar">HI</div>
+                            <div>
+                                <strong>History</strong>
+                                <div class="text-muted">Past interviews</div>
+                            </div>
+                        </div>
+
+                        <p class="text-muted mb-2">
+                            Tra cứu lịch sử đánh giá và trạng thái ứng viên đã phỏng vấn.
+                        </p>
+
+                        <a href="/interviews/my" class="btn btn-outline-primary rounded-pill">
+                            Open History
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
-
 </body>
 
 </html>
