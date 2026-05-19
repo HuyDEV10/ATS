@@ -16,6 +16,8 @@ public interface JobService {
 
     Page<Job> pageJobs(int page, int size, String keyword);
 
+    Page<Job> pagePublishedJobs(int page, int size, String keyword);
+
     List<Job> listJobsByHrId(Long hrId);
 
     boolean changeStatus(Long id, String status, Long currentUserId, String currentUserRole);

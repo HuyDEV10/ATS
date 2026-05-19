@@ -16,6 +16,11 @@ public class CvScoreResult {
     private String recommendation;
     private List<String> interviewQuestions;
 
+    // CV/Form verification
+    private String verificationStatus;
+    private Integer mismatchScore;
+    private String mismatchSummary;
+
     public int getOverallScore() {
         return overallScore;
     }
@@ -94,5 +99,29 @@ public class CvScoreResult {
 
     public void setInterviewQuestions(List<String> interviewQuestions) {
         this.interviewQuestions = interviewQuestions;
+    }
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(String verificationStatus) {
+        this.verificationStatus = verificationStatus;
+    }
+
+    public Integer getMismatchScore() {
+        return mismatchScore;
+    }
+
+    public void setMismatchScore(Integer mismatchScore) {
+        this.mismatchScore = mismatchScore;
+    }
+
+    public String getMismatchSummary() {
+        return mismatchSummary;
+    }
+
+    public void setMismatchSummary(String mismatchSummary) {
+        this.mismatchSummary = mismatchSummary;
     }
 }

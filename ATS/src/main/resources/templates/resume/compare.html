@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Conflict Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 24px;
+            background: #f6f7fb;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+            background: #eee;
+        }
+
+        .HIGH {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .MEDIUM {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .LOW {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .NONE {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        ul {
+            margin-top: 16px;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Resume Conflict Check</h1>
+
+        <p>
+            Conflict level:
+            <span class="badge" th:classappend="${result.conflictLevel}" th:text="${result.conflictLevel}">
+                NONE
+            </span>
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Candidate Form</th>
+                    <th>CV Parsed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Email</td>
+                    <td th:text="${result.formEmail}">form@email.com</td>
+                    <td th:text="${result.cvEmail}">cv@email.com</td>
+                </tr>
+                <tr>
+                    <td>Phone</td>
+                    <td th:text="${result.formPhone}">form phone</td>
+                    <td th:text="${result.cvPhone}">cv phone</td>
+                </tr>
+                <tr>
+                    <td>Skills</td>
+                    <td th:text="${result.formSkills}">form skills</td>
+                    <td th:text="${result.cvSkills}">cv skills</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Warnings</h3>
+        <ul>
+            <li th:each="warning : ${result.warnings}" th:text="${warning}">
+                Warning
+            </li>
+            <li th:if="${#lists.isEmpty(result.warnings)}">
+                No conflict detected.
+            </li>
+        </ul>
+
+        <a th:href="@{/candidates/view/{id}(id=${result.candidateId})}">
+            Back to candidate
+        </a>
+    </div>
+</body>
+
+</html>

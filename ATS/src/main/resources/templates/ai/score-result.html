@@ -97,7 +97,62 @@
                 <h2 class="fw-bold mb-1">Kết quả Phân tích AI</h2>
                 <p class="opacity-75 mb-0">Hệ thống đã tự động đánh giá CV dựa trên mô tả công việc</p>
             </div>
+            <!-- CV/Form Verification -->
+            <div class="mt-4">
 
+                <div class="card border-0 shadow-sm rounded-4">
+
+                    <div class="card-body">
+
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-shield-exclamation text-warning me-2"></i>
+                            CV/Form Verification
+                        </h5>
+
+                        <div th:if="${result.verificationStatus == 'VERIFIED'}" class="alert alert-success rounded-3">
+
+                            <div class="fw-bold mb-1">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Thông tin CV khớp với form ứng viên
+                            </div>
+
+                            <div th:text="${result.mismatchSummary}">
+                                Thông tin trong form khớp với nội dung CV.
+                            </div>
+
+                        </div>
+
+                        <div th:if="${result.verificationStatus != 'VERIFIED'}" class="alert alert-danger rounded-3">
+
+                            <div class="fw-bold mb-2">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Phát hiện sai lệch giữa thông tin Form và CV
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>Trạng thái:</strong>
+                                <span th:text="${result.verificationStatus}">IDENTITY_CONFLICT</span>
+                            </div>
+
+                            <div class="mb-2">
+                                <strong>Điểm sai lệch:</strong>
+                                <span th:text="${result.mismatchScore}">90</span>/100
+                            </div>
+
+                            <div>
+                                <strong>Chi tiết:</strong>
+                                <span th:text="${result.mismatchSummary}">
+                                    Email trong form không xuất hiện trong CV
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
             <div class="card-body p-4 p-md-5 bg-white">
                 <div class="row mb-5">
                     <div class="col-md-4 mb-4">

@@ -2,6 +2,7 @@ package com.dacn.ATS.module.resume.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dacn.ATS.common.util.CurrentUserUtil;
+import com.dacn.ATS.module.resume.dto.ResumeConflictResult;
 import com.dacn.ATS.module.resume.entity.Resume;
 import com.dacn.ATS.module.resume.service.ResumeService;
 
@@ -23,7 +24,6 @@ public class ResumeController {
 
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // TODO: thay bằng lấy từ principal sau khi có UserDetails
         return CurrentUserUtil.getCurrentUserId();
     }
 
@@ -49,11 +49,34 @@ public class ResumeController {
         try {
             Long userId = getCurrentUserId();
             Resume resume = resumeService.uploadResume(file, userId);
-            redirectAttributes.addFlashAttribute("success", "Upload successful. Parse status: PENDING");
+
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Upload successful. Parse status: " + resume.getParseStatus());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Upload failed: " + e.getMessage());
         }
+
         return "redirect:/resumes";
+    }
+
+    @PostMapping("/parse/{id}")
+    public String parseResume(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Resume resume = resumeService.parseResume(id);
+            redirectAttributes.addFlashAttribute("success", "Parse status: " + resume.getParseStatus());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Parse failed: " + e.getMessage());
+        }
+
+        return "redirect:/resumes/view/" + id;
+    }
+
+    @GetMapping("/compare/candidate/{candidateId}")
+    public String compareWithCandidate(@PathVariable Long candidateId, Model model) {
+        ResumeConflictResult result = resumeService.compareResumeWithCandidate(candidateId);
+        model.addAttribute("result", result);
+        return "resume/compare";
     }
 
     @GetMapping("/view/{id}")
@@ -71,6 +94,7 @@ public class ResumeController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Delete failed: " + e.getMessage());
         }
+
         return "redirect:/resumes";
     }
 }
