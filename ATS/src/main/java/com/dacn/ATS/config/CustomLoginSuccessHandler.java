@@ -22,8 +22,13 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         for (GrantedAuthority authority : authentication.getAuthorities()) {
             String role = authority.getAuthority();
 
-            if ("ROLE_ADMIN".equals(role)) {
-                response.sendRedirect("/dashboard/admin");
+            if ("ROLE_PLATFORM_ADMIN".equals(role)) {
+                response.sendRedirect("/dashboard/platform-admin");
+                return;
+            }
+
+            if ("ROLE_COMPANY_OWNER".equals(role)) {
+                response.sendRedirect("/dashboard/company-owner");
                 return;
             }
 
@@ -34,6 +39,11 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
             if ("ROLE_INTERVIEWER".equals(role)) {
                 response.sendRedirect("/dashboard/interviewer");
+                return;
+            }
+
+            if ("ROLE_VIEWER".equals(role)) {
+                response.sendRedirect("/dashboard/viewer");
                 return;
             }
         }

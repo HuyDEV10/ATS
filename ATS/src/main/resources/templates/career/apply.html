@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Apply Job - SmartATS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-5">
+
+        <a th:href="@{/careers/{id}(id=${job.id})}" class="text-decoration-none">
+            ← Quay lại chi tiết công việc
+        </a>
+
+        <div class="row justify-content-center mt-3">
+
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm rounded-4">
+
+                    <div class="card-body p-5">
+
+                        <h2 class="fw-bold mb-1">
+                            Ứng tuyển vị trí
+                        </h2>
+
+                        <h4 class="text-primary" th:text="${job.title}">
+                            Job title
+                        </h4>
+
+                        <p class="text-muted" th:text="${company != null ? company.name : 'Company'}">
+                            Company
+                        </p>
+
+                        <hr class="my-4">
+
+                        <form th:action="@{/careers/{id}/apply(id=${job.id})}" method="post"
+                            enctype="multipart/form-data">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Họ tên
+                                    </label>
+
+                                    <input type="text" name="name" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Email
+                                    </label>
+
+                                    <input type="email" name="email" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Số điện thoại
+                                    </label>
+
+                                    <input type="text" name="phone" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Số năm kinh nghiệm
+                                    </label>
+
+                                    <input type="number" name="experienceYears" class="form-control" min="0">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        LinkedIn
+                                    </label>
+
+                                    <input type="url" name="linkedinUrl" class="form-control"
+                                        placeholder="https://linkedin.com/in/...">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        GitHub / Portfolio
+                                    </label>
+
+                                    <input type="url" name="githubUrl" class="form-control"
+                                        placeholder="https://github.com/...">
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Upload CV
+                                    </label>
+
+                                    <input type="file" name="cvFile" class="form-control" accept=".pdf,.doc,.docx"
+                                        required>
+
+                                    <div class="form-text">
+                                        Hỗ trợ PDF, DOC, DOCX. Tối đa 10MB.
+                                        Hệ thống sẽ tự quét CV và so sánh với thông tin bạn nhập.
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="alert alert-warning mt-4">
+                                Nếu email hoặc số điện thoại trong CV khác với thông tin bạn nhập,
+                                hệ thống có thể từ chối hồ sơ hoặc chuyển sang trạng thái cần HR kiểm tra.
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">
+                                Submit Application
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

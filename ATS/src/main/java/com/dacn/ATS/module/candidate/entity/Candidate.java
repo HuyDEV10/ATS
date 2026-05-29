@@ -7,24 +7,36 @@ import java.time.LocalDateTime;
 public class Candidate {
     @TableId(type = IdType.AUTO)
     private Long id;
+
+    private Long companyId;
     private String name;
     private String email;
     private String phone;
-    private String skills; // lưu dạng text, có thể phân cách bằng dấu phẩy
-    private Integer experienceYears; // số năm kinh nghiệm
-    private Long resumeId; // ID của bảng resumes (sau này dùng)
-    private String source; // nguồn: "upload", "manual", "import"
-    private Long createdBy; // ID người tạo (HR/ADMIN)
+    private String skills;
+    private Integer experienceYears;
+    private Long resumeId;
+    private String source;
+    private Long createdBy;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
     @TableField(fill = FieldFill.UPDATE)
     private LocalDateTime updateTime;
+
     @TableLogic
     private Integer deleted;
 
-    // Getters and Setters
     public Long getId() {
         return id;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public void setId(Long id) {

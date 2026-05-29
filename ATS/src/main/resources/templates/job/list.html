@@ -112,6 +112,10 @@
                                         <input type="hidden" name="status" value="PUBLISHED" />
                                         <button type="submit" class="btn btn-sm btn-outline-success">Publish</button>
                                     </form>
+                                    <a th:if="${job.status == 'PUBLISHED'}" th:href="@{/careers/{id}(id=${job.id})}"
+                                        target="_blank" class="btn btn-sm btn-outline-primary ms-1">
+                                        Public Link
+                                    </a>
                                     <form th:if="${job.status == 'PUBLISHED'}"
                                         th:action="@{/jobs/change-status/{id}(id=${job.id})}" method="post"
                                         style="display:inline" class="ms-1">

@@ -14,10 +14,16 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping("/dashboard/admin")
-    public String adminDashboard(Model model) {
+    @GetMapping("/dashboard/platform-admin")
+    public String platformAdminDashboard(Model model) {
         addDashboardData(model);
-        return "dashboard/admin";
+        return "dashboard/platform-admin";
+    }
+
+    @GetMapping("/dashboard/company-owner")
+    public String companyOwnerDashboard(Model model) {
+        addDashboardData(model);
+        return "dashboard/company-owner";
     }
 
     @GetMapping("/dashboard/hr")
@@ -30,6 +36,21 @@ public class DashboardController {
     public String interviewerDashboard(Model model) {
         addDashboardData(model);
         return "dashboard/interviewer";
+    }
+
+    @GetMapping("/dashboard/viewer")
+    public String viewerDashboard(Model model) {
+        addDashboardData(model);
+        return "dashboard/viewer";
+    }
+
+    /**
+     * Tạm giữ route cũ để tránh lỗi nếu còn link /dashboard/admin.
+     * Sau khi sửa hết menu, có thể xóa route này.
+     */
+    @GetMapping("/dashboard/admin")
+    public String oldAdminDashboardRedirect() {
+        return "redirect:/dashboard/platform-admin";
     }
 
     private void addDashboardData(Model model) {

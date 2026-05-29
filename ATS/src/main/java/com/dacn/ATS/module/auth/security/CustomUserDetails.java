@@ -11,19 +11,27 @@ import java.util.Collections;
 public class CustomUserDetails implements UserDetails {
 
     private final Long id;
+    private final Long companyId;
     private final String username;
     private final String password;
     private final String role;
+    private final String status;
 
     public CustomUserDetails(User user) {
         this.id = user.getId();
+        this.companyId = user.getCompanyId();
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.role = user.getRole();
+        this.status = user.getStatus();
     }
 
     public Long getId() {
         return id;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
     }
 
     public String getRoleName() {
@@ -53,7 +61,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !"LOCKED".equals(status);
     }
 
     @Override
@@ -63,6 +71,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return "ACTIVE".equals(status) || status == null;
     }
 }

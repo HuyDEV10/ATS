@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Viewer Dashboard - SmartATS</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="p-4 bg-white rounded-4 shadow-sm mb-4">
+            <h2>Viewer Dashboard</h2>
+            <p class="text-muted mb-0">
+                Tài khoản Viewer chỉ có quyền xem dữ liệu tuyển dụng và báo cáo, không được chỉnh sửa.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm">
+                    <p class="text-muted fw-bold">Jobs</p>
+                    <h3 th:text="${stats.totalJobs}">0</h3>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm">
+                    <p class="text-muted fw-bold">Candidates</p>
+                    <h3 th:text="${stats.totalCandidates}">0</h3>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm">
+                    <p class="text-muted fw-bold">Applications</p>
+                    <h3 th:text="${stats.totalApplications}">0</h3>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm">
+                    <p class="text-muted fw-bold">Interviews</p>
+                    <h3 th:text="${stats.totalInterviews}">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-md-4">
+                <a href="/jobs" class="text-decoration-none text-dark">
+                    <div class="p-4 bg-white rounded-4 shadow-sm">
+                        <h4>💼 View Jobs</h4>
+                        <p class="text-muted mb-0">Xem danh sách tin tuyển dụng.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="/candidates" class="text-decoration-none text-dark">
+                    <div class="p-4 bg-white rounded-4 shadow-sm">
+                        <h4>👤 View Candidates</h4>
+                        <p class="text-muted mb-0">Xem danh sách ứng viên.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="/applications" class="text-decoration-none text-dark">
+                    <div class="p-4 bg-white rounded-4 shadow-sm">
+                        <h4>📥 View Applications</h4>
+                        <p class="text-muted mb-0">Xem trạng thái ứng tuyển.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

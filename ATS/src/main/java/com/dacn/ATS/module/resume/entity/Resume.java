@@ -9,12 +9,13 @@ import java.time.LocalDateTime;
 public class Resume {
     @TableId(type = IdType.AUTO)
     private Long id;
+    private Long companyId;
     private String fileName;
     private String filePath;
     private String fileHash;
     private Long uploadedBy;
     private LocalDateTime uploadTime;
-    private String parseStatus; // PENDING, PARSED, FAILED
+    private String parseStatus;
     private String parsedText;
     private String parseError;
     private LocalDateTime parsedAt;

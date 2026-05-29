@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers - SmartATS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-5">
+
+        <div class="text-center mb-5">
+            <h1 class="fw-bold">SmartATS Career Portal</h1>
+            <p class="text-muted">
+                Tìm kiếm cơ hội việc làm từ các công ty đang tuyển dụng
+            </p>
+        </div>
+
+        <form method="get" class="row justify-content-center mb-4">
+
+            <div class="col-md-6">
+                <input type="text" name="keyword" th:value="${keyword}" class="form-control form-control-lg"
+                    placeholder="Tìm theo vị trí, phòng ban, địa điểm...">
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary btn-lg w-100">
+                    Tìm kiếm
+                </button>
+            </div>
+
+        </form>
+
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-4" th:each="job : ${jobs}">
+
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-success">
+                                Đang tuyển
+                            </span>
+
+                            <small class="text-muted" th:text="${job.location}">
+                                Đà Nẵng
+                            </small>
+                        </div>
+
+                        <h4 class="fw-bold" th:text="${job.title}">
+                            Java Developer
+                        </h4>
+
+                        <p class="text-muted mb-1" th:text="${job.department}">
+                            IT Department
+                        </p>
+
+                        <p class="text-success fw-semibold" th:text="${job.salaryRange}">
+                            15M - 30M
+                        </p>
+
+                        <a th:href="@{/careers/{id}(id=${job.id})}" class="btn btn-outline-primary w-100 mt-3">
+                            Xem chi tiết
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div th:if="${#lists.isEmpty(jobs)}" class="text-center text-muted py-5">
+            Hiện chưa có công việc phù hợp.
+        </div>
+
+    </div>
+
+</body>
+
+</html>

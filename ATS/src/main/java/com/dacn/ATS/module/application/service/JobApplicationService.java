@@ -7,21 +7,21 @@ import java.util.List;
 import java.util.Map;
 
 public interface JobApplicationService {
-    JobApplication createApplication(JobApplication application);
+        JobApplication createApplication(JobApplication application);
 
-    JobApplication updateApplication(JobApplication application);
+        JobApplication updateApplication(JobApplication application);
 
-    void deleteApplication(Long id);
+        void deleteApplication(Long id);
 
-    JobApplication getApplicationById(Long id);
+        JobApplication getApplicationById(Long id);
 
-    Page<JobApplication> pageApplications(int page, int size, Long jobId, Long candidateId, String status);
+        Page<JobApplication> pageApplications(int page, int size, Long jobId, Long candidateId, String status);
 
-    List<JobApplication> listByJobId(Long jobId);
+        List<JobApplication> listByJobId(Long jobId);
 
-    List<JobApplication> listByCandidateId(Long candidateId);
+        List<JobApplication> listByCandidateId(Long candidateId);
 
-    boolean changeStatus(Long id, String newStatus, String hrNotes);
+        boolean changeStatus(Long id, String newStatus, String hrNotes);
 
-    Map<String, Object> getApplicationDetails(Long id); // kèm tên job và candidate
+        Map<String, Object> getApplicationDetails(Long id); // kèm tên job và candidate
 }

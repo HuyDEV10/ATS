@@ -370,7 +370,9 @@
 
                                 </td>
 
-                                <td th:text="${#temporals.format(app.applicationDate, 'dd/MM/yyyy')}">
+                                <td
+                                    th:text="${app.applicationDate != null ? #temporals.format(app.applicationDate, 'dd/MM/yyyy') : 'N/A'}">
+                                </td>
                                 </td>
 
                                 <td class="text-center">

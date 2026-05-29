@@ -9,23 +9,14 @@ public class JobApplication {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long companyId;
     private Long jobId;
     private Long candidateId;
-
-    // CV được dùng cho lần ứng tuyển này
     private Long resumeId;
-
     private String status;
-
-    // NO_RESUME, CV_PARSE_FAILED, VERIFIED, NEEDS_REVIEW, IDENTITY_CONFLICT
     private String verificationStatus;
-
-    // 0 - 100, càng cao càng lệch giữa form và CV
     private Integer mismatchScore;
-
-    // Tóm tắt các điểm lệch giữa form và CV
     private String mismatchSummary;
-
     private String hrNotes;
     private LocalDateTime applicationDate;
 
@@ -40,6 +31,14 @@ public class JobApplication {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public void setId(Long id) {

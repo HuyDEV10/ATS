@@ -12,6 +12,7 @@ public class ApplicationScore {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long companyId;
     private Long applicationId;
     private Long jobId;
     private Long candidateId;

@@ -16,10 +16,21 @@ public interface UserService {
 
     List<User> findAllUsers();
 
+    List<User> findUsersByCompanyId(Long companyId);
+
     User createUserByAdmin(
             String username,
             String password,
             String email,
+            String role);
+
+    User createCompanyUser(
+            Long companyId,
+            String username,
+            String password,
+            String email,
+            String fullName,
+            String phone,
             String role);
 
     void changeRole(Long userId, String role);

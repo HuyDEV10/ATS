@@ -9,13 +9,14 @@ public class Job {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    private Long companyId;
     private String title;
     private String description;
     private String department;
     private String location;
-    private String salaryRange; // ví dụ "1000-2000 USD"
-    private String status; // DRAFT, PUBLISHED, CLOSED
-    private Long hrId; // ID người tạo (HR/ADMIN)
+    private String salaryRange;
+    private String status;
+    private Long hrId;
     private LocalDateTime publishDate;
 
     @TableField(fill = FieldFill.INSERT)
@@ -27,10 +28,16 @@ public class Job {
     @TableLogic
     private Integer deleted;
 
-    // ===== Getter & Setter =====
-
     public Long getId() {
         return id;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public void setId(Long id) {

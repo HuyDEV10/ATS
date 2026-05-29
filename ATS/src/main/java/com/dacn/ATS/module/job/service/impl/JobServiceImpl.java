@@ -3,6 +3,7 @@ package com.dacn.ATS.module.job.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dacn.ATS.common.enums.ResultCodeEnum;
+import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.exception.BusinessException;
 import com.dacn.ATS.module.job.entity.Job;
 import com.dacn.ATS.module.job.mapper.JobMapper;
@@ -23,7 +24,14 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job createJob(Job job, Long hrId) {
+        Long companyId = CurrentUserUtil.getCurrentCompanyId();
+
+        if (!CurrentUserUtil.isPlatformAdmin() && companyId == null) {
+            throw new BusinessException(ResultCodeEnum.FORBIDDEN, "Current user does not belong to a company");
+        }
+
         job.setId(null);
+        job.setCompanyId(companyId);
         job.setHrId(hrId);
         job.setStatus("DRAFT");
         job.setPublishDate(null);
@@ -37,26 +45,34 @@ public class JobServiceImpl implements JobService {
     @Override
     public Job updateJob(Job job) {
         Job existing = getJobById(job.getId());
-        if (existing == null) {
-            throw new BusinessException(ResultCodeEnum.NOT_FOUND, "Job not found");
-        }
-        job.setUpdateTime(LocalDateTime.now());
-        jobMapper.updateById(job);
-        return jobMapper.selectById(job.getId());
+        checkCompanyAccess(existing);
+
+        existing.setTitle(job.getTitle());
+        existing.setDescription(job.getDescription());
+        existing.setDepartment(job.getDepartment());
+        existing.setLocation(job.getLocation());
+        existing.setSalaryRange(job.getSalaryRange());
+        existing.setUpdateTime(LocalDateTime.now());
+
+        jobMapper.updateById(existing);
+        return jobMapper.selectById(existing.getId());
     }
 
     @Override
     public void deleteJob(Long id) {
         Job job = getJobById(id);
-        if (job == null) {
-            throw new BusinessException(ResultCodeEnum.NOT_FOUND);
-        }
+        checkCompanyAccess(job);
         jobMapper.deleteById(id);
     }
 
     @Override
     public Job getJobById(Long id) {
-        return jobMapper.selectById(id);
+        Job job = jobMapper.selectById(id);
+        if (job == null) {
+            throw new BusinessException(ResultCodeEnum.NOT_FOUND, "Job not found");
+        }
+        checkCompanyAccess(job);
+        return job;
     }
 
     @Override
@@ -64,10 +80,15 @@ public class JobServiceImpl implements JobService {
         Page<Job> pageObj = new Page<>(page, size);
         LambdaQueryWrapper<Job> wrapper = new LambdaQueryWrapper<>();
 
+        Long companyId = CurrentUserUtil.getCurrentCompanyId();
+        if (!CurrentUserUtil.isPlatformAdmin()) {
+            wrapper.eq(Job::getCompanyId, companyId);
+        }
+
         if (StringUtils.hasText(keyword)) {
-            wrapper.like(Job::getTitle, keyword)
+            wrapper.and(w -> w.like(Job::getTitle, keyword)
                     .or()
-                    .like(Job::getDepartment, keyword);
+                    .like(Job::getDepartment, keyword));
         }
 
         wrapper.orderByDesc(Job::getCreateTime);
@@ -78,19 +99,29 @@ public class JobServiceImpl implements JobService {
     public List<Job> listJobsByHrId(Long hrId) {
         LambdaQueryWrapper<Job> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Job::getHrId, hrId);
+
+        Long companyId = CurrentUserUtil.getCurrentCompanyId();
+        if (!CurrentUserUtil.isPlatformAdmin()) {
+            wrapper.eq(Job::getCompanyId, companyId);
+        }
+
         wrapper.orderByDesc(Job::getCreateTime);
         return jobMapper.selectList(wrapper);
     }
 
     @Override
     public boolean changeStatus(Long id, String status, Long currentUserId, String currentUserRole) {
-        Job job = getJobById(id);
+        Job job = jobMapper.selectById(id);
         if (job == null) {
             return false;
         }
 
-        if (!"ADMIN".equals(currentUserRole) && !job.getHrId().equals(currentUserId)) {
-            throw new BusinessException(ResultCodeEnum.FORBIDDEN, "You are not the owner of this job");
+        checkCompanyAccess(job);
+
+        if (!CurrentUserUtil.isPlatformAdmin()
+                && !"COMPANY_OWNER".equals(currentUserRole)
+                && !job.getHrId().equals(currentUserId)) {
+            throw new BusinessException(ResultCodeEnum.FORBIDDEN, "You are not allowed to change this job status");
         }
 
         job.setStatus(status);
@@ -99,7 +130,20 @@ public class JobServiceImpl implements JobService {
             job.setPublishDate(LocalDateTime.now());
         }
 
+        job.setUpdateTime(LocalDateTime.now());
         jobMapper.updateById(job);
         return true;
+    }
+
+    private void checkCompanyAccess(Job job) {
+        if (CurrentUserUtil.isPlatformAdmin()) {
+            return;
+        }
+
+        Long currentCompanyId = CurrentUserUtil.getCurrentCompanyId();
+
+        if (currentCompanyId == null || job.getCompanyId() == null || !currentCompanyId.equals(job.getCompanyId())) {
+            throw new BusinessException(ResultCodeEnum.FORBIDDEN, "Cannot access another company's job");
+        }
     }
 }

@@ -7,27 +7,39 @@ import java.time.LocalDateTime;
 public class InterviewRecord {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private Long applicationId; // ID từ bảng job_applications
-    private Long interviewerId; // ID người phỏng vấn (user)
+
+    private Long companyId;
+    private Long applicationId;
+    private Long interviewerId;
     private LocalDateTime interviewDate;
-    private Integer round; // vòng phỏng vấn (1,2,3...)
-    private String status; // SCHEDULED, COMPLETED, CANCELLED
-    private String feedback; // nhận xét của interviewer
-    private Integer score; // điểm (0-10 hoặc 0-100)
-    private String recommendation; // RECOMMEND, POTENTIAL, REJECT
-    private String meetingLink; // link online (nếu có)
-    private String location; // địa điểm (nếu offline)
-    private String notes; // ghi chú thêm
+    private Integer round;
+    private String status;
+    private String feedback;
+    private Integer score;
+    private String recommendation;
+    private String meetingLink;
+    private String location;
+    private String notes;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
     @TableField(fill = FieldFill.UPDATE)
     private LocalDateTime updateTime;
+
     @TableLogic
     private Integer deleted;
 
-    // Getters and Setters
     public Long getId() {
         return id;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public void setId(Long id) {

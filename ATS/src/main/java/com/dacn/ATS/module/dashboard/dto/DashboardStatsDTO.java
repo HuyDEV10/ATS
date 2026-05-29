@@ -8,6 +8,7 @@ public class DashboardStatsDTO {
     private long totalInterviews;
     private long pendingApplications;
     private long scheduledInterviews;
+    private Long totalCompanies;
 
     public long getTotalJobs() {
         return totalJobs;
@@ -55,5 +56,13 @@ public class DashboardStatsDTO {
 
     public void setScheduledInterviews(long scheduledInterviews) {
         this.scheduledInterviews = scheduledInterviews;
+    }
+
+    public Long getTotalCompanies() {
+        return totalCompanies;
+    }
+
+    public void setTotalCompanies(Long totalCompanies) {
+        this.totalCompanies = totalCompanies;
     }
 }
