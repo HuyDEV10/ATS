@@ -20,4 +20,6 @@ public interface ResumeService {
     Resume parseResume(Long resumeId);
 
     ResumeConflictResult compareResumeWithCandidate(Long candidateId);
+
+    Resume uploadResumeForCompany(MultipartFile file, Long companyId) throws IOException;
 }

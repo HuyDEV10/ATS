@@ -53,6 +53,46 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    public Resume uploadResumeForCompany(MultipartFile file, Long companyId) throws IOException {
+        if (!FileValidationUtil.isValidFile(file)) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "Only PDF, DOC, DOCX files under 10MB are allowed");
+        }
+
+        FileScanResult scanResult = fileSecurityScanner.scan(file);
+        if (!scanResult.isSafe()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, scanResult.getMessage());
+        }
+
+        String md5 = DigestUtils.md5DigestAsHex(file.getInputStream());
+
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String originalName = file.getOriginalFilename();
+        String ext = FileValidationUtil.getFileExtension(originalName);
+        String savedName = System.currentTimeMillis() + "_public_apply" + ext;
+        Path filePath = uploadPath.resolve(savedName);
+
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        Resume resume = new Resume();
+        resume.setCompanyId(companyId);
+        resume.setFileName(originalName);
+        resume.setFilePath(filePath.toString());
+        resume.setFileHash(md5);
+        resume.setUploadedBy(null);
+        resume.setUploadTime(LocalDateTime.now());
+        resume.setParseStatus("PENDING");
+        resume.setDeleted(0);
+
+        resumeMapper.insert(resume);
+
+        return parseResume(resume.getId());
+    }
+
+    @Override
     public Resume uploadResume(MultipartFile file, Long userId) throws IOException {
         if (!FileValidationUtil.isValidFile(file)) {
             throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "Only PDF, DOC, DOCX files under 10MB are allowed");

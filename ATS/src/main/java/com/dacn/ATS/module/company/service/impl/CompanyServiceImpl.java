@@ -1,10 +1,14 @@
 package com.dacn.ATS.module.company.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dacn.ATS.common.enums.ResultCodeEnum;
 import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.exception.BusinessException;
+import com.dacn.ATS.module.auth.entity.User;
+import com.dacn.ATS.module.auth.enums.UserStatus;
+import com.dacn.ATS.module.auth.mapper.UserMapper;
 import com.dacn.ATS.module.company.entity.Company;
 import com.dacn.ATS.module.company.enums.CompanyStatus;
 import com.dacn.ATS.module.company.mapper.CompanyMapper;
@@ -13,15 +17,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.lang.reflect.Method;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyMapper companyMapper;
+    private final UserMapper userMapper;
 
-    public CompanyServiceImpl(CompanyMapper companyMapper) {
+    public CompanyServiceImpl(CompanyMapper companyMapper, UserMapper userMapper) {
         this.companyMapper = companyMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -46,28 +51,12 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Company getCurrentCompany() {
-        Long companyId = null;
-        try {
-            Method m = CurrentUserUtil.class.getMethod("getCurrentCompanyId");
-            companyId = (Long) m.invoke(null);
-        } catch (NoSuchMethodException e) {
-            try {
-                Method getUser = CurrentUserUtil.class.getMethod("getCurrentUser");
-                Object user = getUser.invoke(null);
-                if (user != null) {
-                    Method getCompanyId = user.getClass().getMethod("getCompanyId");
-                    companyId = (Long) getCompanyId.invoke(user);
-                }
-            } catch (Exception ex) {
-                // fallback to null
-            }
-        } catch (Exception e) {
-            // fallback to null
-        }
+        Long companyId = CurrentUserUtil.getCurrentCompanyId();
 
         if (companyId == null) {
             throw new BusinessException(ResultCodeEnum.FORBIDDEN, "Current user does not belong to a company");
         }
+
         return getCompanyById(companyId);
     }
 
@@ -109,9 +98,9 @@ public class CompanyServiceImpl implements CompanyService {
         LambdaQueryWrapper<Company> wrapper = new LambdaQueryWrapper<>();
 
         if (StringUtils.hasText(keyword)) {
-            wrapper.like(Company::getName, keyword)
+            wrapper.and(w -> w.like(Company::getName, keyword)
                     .or()
-                    .like(Company::getIndustry, keyword);
+                    .like(Company::getIndustry, keyword));
         }
 
         if (StringUtils.hasText(status)) {
@@ -124,24 +113,45 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void approveCompany(Long id) {
-        changeStatus(id, CompanyStatus.ACTIVE);
+        Company company = getCompanyById(id);
+        company.setStatus(CompanyStatus.ACTIVE.name());
+        company.setUpdatedAt(LocalDateTime.now());
+        companyMapper.updateById(company);
+
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getCompanyId, id)
+                .eq(User::getStatus, UserStatus.PENDING.name())
+                .set(User::getStatus, UserStatus.ACTIVE.name());
+
+        userMapper.update(null, wrapper);
     }
 
     @Override
     public void suspendCompany(Long id) {
-        changeStatus(id, CompanyStatus.SUSPENDED);
+        Company company = getCompanyById(id);
+        company.setStatus(CompanyStatus.SUSPENDED.name());
+        company.setUpdatedAt(LocalDateTime.now());
+        companyMapper.updateById(company);
+
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getCompanyId, id)
+                .set(User::getStatus, UserStatus.LOCKED.name());
+
+        userMapper.update(null, wrapper);
     }
 
     @Override
     public void rejectCompany(Long id) {
-        changeStatus(id, CompanyStatus.REJECTED);
-    }
-
-    private void changeStatus(Long id, CompanyStatus status) {
         Company company = getCompanyById(id);
-        company.setStatus(status.name());
+        company.setStatus(CompanyStatus.REJECTED.name());
         company.setUpdatedAt(LocalDateTime.now());
         companyMapper.updateById(company);
+
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getCompanyId, id)
+                .eq(User::getStatus, UserStatus.PENDING.name())
+                .set(User::getStatus, UserStatus.LOCKED.name());
+
+        userMapper.update(null, wrapper);
     }
 }
- 

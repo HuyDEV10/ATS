@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Team Members - SmartATS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f3ff;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .page-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 32px 16px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #5b21b6, #7c3aed);
+            color: #fff;
+            border-radius: 28px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .card-soft {
+            border: 0;
+            border-radius: 24px;
+            box-shadow: 0 14px 40px rgba(88, 28, 135, 0.08);
+        }
+
+        .role-badge {
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+
+        <section class="hero">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h2 class="fw-bold mb-2">Team Members</h2>
+                    <p class="mb-0">
+                        Quản lý các tài khoản thuộc công ty: HR, Interviewer và Viewer.
+                    </p>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="/dashboard/company-owner" class="btn btn-outline-light rounded-pill px-4">
+                        Dashboard
+                    </a>
+
+                    <a href="/company/users/create" class="btn btn-light rounded-pill px-4 fw-bold">
+                        + Add Member
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <div th:if="${success}" class="alert alert-success rounded-4" th:text="${success}"></div>
+
+        <div class="card card-soft">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Member</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th style="width: 260px;">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.id}">1</td>
+
+                                <td>
+                                    <div class="fw-bold"
+                                        th:text="${user.fullName != null ? user.fullName : user.username}">
+                                        Full Name
+                                    </div>
+                                    <div class="small text-muted" th:text="${user.username}">
+                                        username
+                                    </div>
+                                </td>
+
+                                <td th:text="${user.email}">email</td>
+                                <td th:text="${user.phone}">phone</td>
+
+                                <td>
+                                    <span class="badge bg-primary role-badge" th:text="${user.role}">
+                                        HR
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success role-badge" th:text="${user.status}">
+                                        ACTIVE
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <form th:action="@{/company/users/{id}/role(id=${user.id})}" method="post"
+                                            class="d-flex gap-2">
+                                            <select name="role" class="form-select form-select-sm">
+                                                <option value="HR" th:selected="${user.role == 'HR'}">HR</option>
+                                                <option value="INTERVIEWER" th:selected="${user.role == 'INTERVIEWER'}">
+                                                    INTERVIEWER
+                                                </option>
+                                                <option value="VIEWER" th:selected="${user.role == 'VIEWER'}">VIEWER
+                                                </option>
+                                            </select>
+
+                                            <button class="btn btn-sm btn-outline-primary" type="submit">
+                                                Save
+                                            </button>
+                                        </form>
+
+                                        <form th:action="@{/company/users/{id}/delete(id=${user.id})}" method="post"
+                                            onsubmit="return confirm('Delete this member?');">
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    Chưa có thành viên nào trong công ty.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

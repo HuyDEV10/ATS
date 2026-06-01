@@ -17,13 +17,13 @@ public class PublicJobController {
 
     @GetMapping
     public String publicJobs(Model model) {
-        model.addAttribute("jobs", jobService.pageJobs(1, 100, null).getRecords());
+        model.addAttribute("jobs", jobService.listPublishedPublicJobs());
         return "public/jobs";
     }
 
     @GetMapping("/{id}")
     public String publicJobDetail(@PathVariable Long id, Model model) {
-        model.addAttribute("job", jobService.getJobById(id));
+        model.addAttribute("job", jobService.getPublicPublishedJobById(id));
         return "public/job-detail";
     }
 }

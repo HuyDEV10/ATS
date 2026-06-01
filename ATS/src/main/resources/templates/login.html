@@ -194,11 +194,19 @@
             </form>
 
             <div class="text-center mt-4">
-                <p class="small mb-0">
-                    Chưa có tài khoản?
+                <p class="small mb-2">
+                    Bạn là doanh nghiệp?
 
-                    <a th:href="@{/auth/register}" class="register-link">
-                        Đăng ký ngay
+                    <a th:href="@{/public/company/register}" class="register-link">
+                        Đăng ký công ty
+                    </a>
+                </p>
+
+                <p class="small mb-0">
+                    Bạn là ứng viên?
+
+                    <a th:href="@{/public/jobs}" class="register-link">
+                        Xem việc làm và ứng tuyển
                     </a>
                 </p>
             </div>

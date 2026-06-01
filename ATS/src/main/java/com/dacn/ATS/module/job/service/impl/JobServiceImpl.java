@@ -110,6 +110,25 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public List<Job> listPublishedPublicJobs() {
+        LambdaQueryWrapper<Job> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Job::getStatus, "PUBLISHED");
+        wrapper.orderByDesc(Job::getPublishDate);
+        return jobMapper.selectList(wrapper);
+    }
+
+    @Override
+    public Job getPublicPublishedJobById(Long id) {
+        Job job = jobMapper.selectById(id);
+
+        if (job == null || !"PUBLISHED".equals(job.getStatus())) {
+            throw new BusinessException(ResultCodeEnum.NOT_FOUND, "Job not found or not published");
+        }
+
+        return job;
+    }
+
+    @Override
     public boolean changeStatus(Long id, String status, Long currentUserId, String currentUserRole) {
         Job job = jobMapper.selectById(id);
         if (job == null) {

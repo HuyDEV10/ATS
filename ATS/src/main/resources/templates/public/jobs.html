@@ -392,8 +392,8 @@
             </a>
             <div class="d-none d-md-flex align-items-center gap-2">
                 <a href="/public/jobs" class="nav-pill active">Việc làm</a>
+                <a href="/public/company/register" class="nav-pill">Dành cho công ty</a>
                 <a href="/auth/login" class="nav-pill">Đăng nhập</a>
-                <a href="/auth/register" class="btn btn-success rounded-pill px-4 fw-bold">Đăng ký</a>
             </div>
         </nav>
     </header>
@@ -407,7 +407,17 @@
                     <h1>Tìm đúng công việc, ứng tuyển nhanh với SmartATS</h1>
                     <p>Khám phá các vị trí đang tuyển, nộp CV trực tuyến và để hệ thống AI hỗ trợ phân tích độ phù hợp
                         của hồ sơ với công việc.</p>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a href="#jobList" class="btn btn-light rounded-pill px-4 fw-bold">
+                            <i class="bi bi-search me-1"></i>
+                            Xem việc làm
+                        </a>
 
+                        <a href="/public/company/register" class="btn btn-outline-light rounded-pill px-4 fw-bold">
+                            <i class="bi bi-building-add me-1"></i>
+                            Đăng ký công ty
+                        </a>
+                    </div>
                     <div class="search-panel">
                         <div class="row g-2 align-items-center">
                             <div class="col-lg-5">
@@ -600,10 +610,32 @@
                 </div>
 
                 <div class="footer-cta">
-                    <div class="side-title mb-2">Bạn đã sẵn sàng ứng tuyển?</div>
-                    <p class="text-muted mb-3">Tạo tài khoản để theo dõi hồ sơ, quản lý CV và cập nhật trạng thái ứng
-                        tuyển.</p>
-                    <a href="/auth/register" class="btn btn-success rounded-pill px-4 fw-bold">Đăng ký ngay</a>
+                    <div class="side-title mb-2">Bạn là ứng viên?</div>
+
+                    <p class="text-muted mb-3">
+                        Chọn công việc phù hợp, điền form ứng tuyển và upload CV trực tiếp.
+                    </p>
+
+                    <a href="#jobList" class="btn btn-success rounded-pill px-4 fw-bold">
+                        Xem việc làm
+                    </a>
+                </div>
+
+                <div class="footer-cta"
+                    style="background: linear-gradient(135deg, #ffffff, #eef2ff); border-color: #dbe4ff;">
+                    <div class="side-title mb-2">
+                        <i class="bi bi-building-check text-primary me-2"></i>
+                        Bạn là doanh nghiệp?
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Đăng ký công ty để đăng tin tuyển dụng, quản lý ứng viên, dùng AI chấm CV và điều phối phỏng
+                        vấn.
+                    </p>
+
+                    <a href="/public/company/register" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        Đăng ký công ty
+                    </a>
                 </div>
             </aside>
         </div>

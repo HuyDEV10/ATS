@@ -48,6 +48,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         }
 
         application.setId(null);
+        application.setCompanyId(job.getCompanyId());
         application.setStatus(ApplicationStatus.PENDING.name());
         application.setApplicationDate(LocalDateTime.now());
         application.setCreateTime(LocalDateTime.now());

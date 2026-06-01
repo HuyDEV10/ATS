@@ -18,5 +18,9 @@ public interface JobService {
 
     List<Job> listJobsByHrId(Long hrId);
 
+    List<Job> listPublishedPublicJobs();
+
+    Job getPublicPublishedJobById(Long id);
+
     boolean changeStatus(Long id, String status, Long currentUserId, String currentUserRole);
 }
