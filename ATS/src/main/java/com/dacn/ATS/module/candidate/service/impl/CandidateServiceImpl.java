@@ -3,6 +3,7 @@ package com.dacn.ATS.module.candidate.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dacn.ATS.common.enums.ResultCodeEnum;
+import com.dacn.ATS.common.util.CurrentUserUtil;
 import com.dacn.ATS.exception.BusinessException;
 import com.dacn.ATS.module.auth.entity.User;
 import com.dacn.ATS.module.auth.mapper.UserMapper;
@@ -31,7 +32,6 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Override
     public Candidate createCandidate(Candidate candidate, Long currentUserId) {
-
         User user = userMapper.selectById(currentUserId);
 
         if (user == null) {
@@ -40,10 +40,15 @@ public class CandidateServiceImpl implements CandidateService {
                     "Current user not found");
         }
 
+        if (!isPlatformAdmin(user.getRole()) && user.getCompanyId() == null) {
+            throw new BusinessException(
+                    ResultCodeEnum.FORBIDDEN,
+                    "Current user has no company scope");
+        }
+
         candidate.setId(null);
         candidate.setCreatedBy(currentUserId);
         candidate.setCompanyId(user.getCompanyId());
-
         candidate.setCreateTime(LocalDateTime.now());
         candidate.setUpdateTime(LocalDateTime.now());
         candidate.setDeleted(0);
@@ -58,16 +63,17 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-    public Candidate createPublicCandidate(
-            Candidate candidate,
-            Long companyId) {
+    public Candidate createPublicCandidate(Candidate candidate, Long companyId) {
+        if (companyId == null) {
+            throw new BusinessException(
+                    ResultCodeEnum.BAD_REQUEST,
+                    "Company id is required for public candidate");
+        }
 
         candidate.setId(null);
         candidate.setCreatedBy(null);
-
         candidate.setCompanyId(companyId);
         candidate.setSource("public_apply");
-
         candidate.setCreateTime(LocalDateTime.now());
         candidate.setUpdateTime(LocalDateTime.now());
         candidate.setDeleted(0);
@@ -79,41 +85,42 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Override
     public Candidate updateCandidate(Candidate candidate) {
-
         Candidate existing = getCandidateById(candidate.getId());
 
-        if (existing == null) {
-            throw new BusinessException(
-                    ResultCodeEnum.NOT_FOUND,
-                    "Candidate not found");
-        }
+        checkCompanyAccess(existing);
 
-        candidate.setCompanyId(existing.getCompanyId());
-        candidate.setCreatedBy(existing.getCreatedBy());
+        existing.setName(candidate.getName());
+        existing.setEmail(candidate.getEmail());
+        existing.setPhone(candidate.getPhone());
+        existing.setSkills(candidate.getSkills());
+        existing.setExperienceYears(candidate.getExperienceYears());
+        existing.setResumeId(candidate.getResumeId());
+        existing.setSource(candidate.getSource());
+        existing.setUpdateTime(LocalDateTime.now());
 
-        candidate.setCreateTime(existing.getCreateTime());
-        candidate.setUpdateTime(LocalDateTime.now());
+        candidateMapper.updateById(existing);
 
-        candidateMapper.updateById(candidate);
-
-        return candidateMapper.selectById(candidate.getId());
+        return candidateMapper.selectById(existing.getId());
     }
 
     @Override
     public void deleteCandidate(Long id) {
-
         Candidate candidate = getCandidateById(id);
-
-        if (candidate == null) {
-            throw new BusinessException(ResultCodeEnum.NOT_FOUND);
-        }
-
+        checkCompanyAccess(candidate);
         candidateMapper.deleteById(id);
     }
 
     @Override
     public Candidate getCandidateById(Long id) {
-        return candidateMapper.selectById(id);
+        Candidate candidate = candidateMapper.selectById(id);
+
+        if (candidate == null) {
+            throw new BusinessException(ResultCodeEnum.NOT_FOUND, "Candidate not found");
+        }
+
+        checkCompanyAccess(candidate);
+
+        return candidate;
     }
 
     @Override
@@ -123,8 +130,19 @@ public class CandidateServiceImpl implements CandidateService {
             String keyword) {
 
         Page<Candidate> pageObj = new Page<>(page, size);
-
         LambdaQueryWrapper<Candidate> wrapper = buildKeywordWrapper(keyword);
+
+        if (!CurrentUserUtil.isPlatformAdmin()) {
+            Long companyId = CurrentUserUtil.getCurrentCompanyId();
+
+            if (companyId == null) {
+                throw new BusinessException(
+                        ResultCodeEnum.FORBIDDEN,
+                        "Current user has no company scope");
+            }
+
+            wrapper.eq(Candidate::getCompanyId, companyId);
+        }
 
         wrapper.orderByDesc(Candidate::getCreateTime);
 
@@ -140,23 +158,18 @@ public class CandidateServiceImpl implements CandidateService {
             String currentUserRole) {
 
         Page<Candidate> pageObj = new Page<>(page, size);
-
         LambdaQueryWrapper<Candidate> wrapper = buildKeywordWrapper(keyword);
 
-        if (!isAdmin(currentUserRole)) {
-
+        if (!isPlatformAdmin(currentUserRole)) {
             User user = userMapper.selectById(currentUserId);
 
             if (user == null || user.getCompanyId() == null) {
-
                 throw new BusinessException(
                         ResultCodeEnum.FORBIDDEN,
                         "User has no company scope");
             }
 
-            wrapper.eq(
-                    Candidate::getCompanyId,
-                    user.getCompanyId());
+            wrapper.eq(Candidate::getCompanyId, user.getCompanyId());
         }
 
         wrapper.orderByDesc(Candidate::getCreateTime);
@@ -166,23 +179,31 @@ public class CandidateServiceImpl implements CandidateService {
 
     @Override
     public List<Candidate> listCandidatesByCreatedBy(Long createdBy) {
-
         LambdaQueryWrapper<Candidate> wrapper = new LambdaQueryWrapper<>();
 
         wrapper.eq(Candidate::getCreatedBy, createdBy);
+
+        if (!CurrentUserUtil.isPlatformAdmin()) {
+            Long companyId = CurrentUserUtil.getCurrentCompanyId();
+
+            if (companyId == null) {
+                throw new BusinessException(
+                        ResultCodeEnum.FORBIDDEN,
+                        "Current user has no company scope");
+            }
+
+            wrapper.eq(Candidate::getCompanyId, companyId);
+        }
 
         wrapper.orderByDesc(Candidate::getCreateTime);
 
         return candidateMapper.selectList(wrapper);
     }
 
-    private LambdaQueryWrapper<Candidate> buildKeywordWrapper(
-            String keyword) {
-
+    private LambdaQueryWrapper<Candidate> buildKeywordWrapper(String keyword) {
         LambdaQueryWrapper<Candidate> wrapper = new LambdaQueryWrapper<>();
 
         if (StringUtils.hasText(keyword)) {
-
             wrapper.and(w -> w.like(Candidate::getName, keyword)
                     .or()
                     .like(Candidate::getEmail, keyword)
@@ -195,9 +216,24 @@ public class CandidateServiceImpl implements CandidateService {
         return wrapper;
     }
 
-    private boolean isAdmin(String role) {
+    private void checkCompanyAccess(Candidate candidate) {
+        if (CurrentUserUtil.isPlatformAdmin()) {
+            return;
+        }
 
-        return "ADMIN".equals(role)
-                || "ROLE_ADMIN".equals(role);
+        Long currentCompanyId = CurrentUserUtil.getCurrentCompanyId();
+
+        if (currentCompanyId == null
+                || candidate.getCompanyId() == null
+                || !currentCompanyId.equals(candidate.getCompanyId())) {
+
+            throw new BusinessException(
+                    ResultCodeEnum.FORBIDDEN,
+                    "Cannot access candidate from another company");
+        }
+    }
+
+    private boolean isPlatformAdmin(String role) {
+        return "PLATFORM_ADMIN".equals(role) || "ROLE_PLATFORM_ADMIN".equals(role);
     }
 }

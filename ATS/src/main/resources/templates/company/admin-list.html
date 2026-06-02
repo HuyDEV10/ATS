@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Companies</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
+</head>
+
+<body class="container py-4">
+
+    <h2>Company Management</h2>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="mb-3">
+        <a class="btn btn-primary" th:href="@{/admin/companies/create}">Create Company</a>
+    </div>
+
+    <form method="get" th:action="@{/admin/companies}" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input class="form-control" name="keyword" placeholder="Search name / industry" th:value="${keyword}">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="status">
+                <option value="">All status</option>
+                <option value="PENDING" th:selected="${status == 'PENDING'}">PENDING</option>
+                <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">ACTIVE</option>
+                <option value="SUSPENDED" th:selected="${status == 'SUSPENDED'}">SUSPENDED</option>
+                <option value="REJECTED" th:selected="${status == 'REJECTED'}">REJECTED</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-secondary w-100">Filter</button>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Website</th>
+                <th>Status</th>
+                <th style="width: 280px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="company : ${companyPage.records}">
+                <td th:text="${company.id}"></td>
+                <td th:text="${company.name}"></td>
+                <td th:text="${company.industry}"></td>
+                <td>
+                    <a th:if="${company.website}" th:href="${company.website}" target="_blank"
+                        th:text="${company.website}"></a>
+                </td>
+                <td th:text="${company.status}"></td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary"
+                        th:href="@{'/admin/companies/edit/' + ${company.id}}">Edit</a>
+
+                    <form th:action="@{'/admin/companies/approve/' + ${company.id}}" method="post"
+                        style="display:inline">
+                        <button class="btn btn-sm btn-success">Approve</button>
+                    </form>
+
+                    <form th:action="@{'/admin/companies/suspend/' + ${company.id}}" method="post"
+                        style="display:inline">
+                        <button class="btn btn-sm btn-warning">Suspend</button>
+                    </form>
+
+                    <form th:action="@{'/admin/companies/reject/' + ${company.id}}" method="post"
+                        style="display:inline">
+                        <button class="btn btn-sm btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+</html>

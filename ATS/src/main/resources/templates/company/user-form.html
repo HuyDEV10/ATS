@@ -35,10 +35,13 @@
     <div class="page-shell">
 
         <div class="mb-4">
-            <a href="/company/users" class="text-decoration-none">
+            <a th:href="@{/company/users}" class="text-decoration-none">
                 ← Back to team members
             </a>
         </div>
+
+        <div th:if="${success}" class="alert alert-success rounded-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger rounded-4" th:text="${error}"></div>
 
         <div class="card form-card">
             <div class="card-body p-4 p-lg-5">
@@ -48,36 +51,39 @@
                     Tạo tài khoản HR, Interviewer hoặc Viewer thuộc công ty hiện tại.
                 </p>
 
-                <form th:action="@{/company/users/create}" method="post">
+                <form th:action="@{/company/users/create}" method="post" th:object="${request}">
+
                     <div class="mb-3">
                         <label class="form-label">Full name</label>
-                        <input name="fullName" class="form-control form-control-lg" placeholder="Nguyễn Văn A">
+                        <input th:field="*{fullName}" class="form-control form-control-lg" placeholder="Nguyễn Văn A">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Username *</label>
-                        <input name="username" class="form-control form-control-lg" required>
+                        <input th:field="*{username}" class="form-control form-control-lg" placeholder="hr01" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Email *</label>
-                        <input type="email" name="email" class="form-control form-control-lg" required>
+                        <input type="email" th:field="*{email}" class="form-control form-control-lg"
+                            placeholder="hr@company.com" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Phone</label>
-                        <input name="phone" class="form-control form-control-lg">
+                        <input th:field="*{phone}" class="form-control form-control-lg" placeholder="090xxxxxxx">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Password *</label>
-                        <input type="password" name="password" class="form-control form-control-lg" required>
+                        <input type="password" th:field="*{password}" class="form-control form-control-lg" required>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label">Role *</label>
 
-                        <select name="role" class="form-select form-select-lg" required>
+                        <select th:field="*{role}" class="form-select form-select-lg" required>
+                            <option value="">Select role</option>
                             <option value="HR">HR</option>
                             <option value="INTERVIEWER">INTERVIEWER</option>
                             <option value="VIEWER">VIEWER</option>
@@ -90,7 +96,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="/company/users" class="btn btn-outline-secondary rounded-pill px-4">
+                        <a th:href="@{/company/users}" class="btn btn-outline-secondary rounded-pill px-4">
                             Cancel
                         </a>
 

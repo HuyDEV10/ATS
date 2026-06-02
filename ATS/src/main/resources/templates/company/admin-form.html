@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Company Form</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}">
+</head>
+
+<body class="container py-4">
+
+    <h2 th:text="${company.id == null ? 'Create Company' : 'Edit Company'}"></h2>
+
+    <form method="post"
+        th:action="${company.id == null} ? @{/admin/companies/create} : @{'/admin/companies/edit/' + ${company.id}}"
+        th:object="${company}">
+
+        <div class="mb-3">
+            <label class="form-label">Company name</label>
+            <input class="form-control" th:field="*{name}" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Logo URL</label>
+            <input class="form-control" th:field="*{logoUrl}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Industry</label>
+            <input class="form-control" th:field="*{industry}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Company size</label>
+            <input class="form-control" th:field="*{companySize}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Website</label>
+            <input class="form-control" th:field="*{website}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Address</label>
+            <input class="form-control" th:field="*{address}">
+        </div>
+
+        <button class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary" th:href="@{/admin/companies}">Back</a>
+    </form>
+
+</body>
+
+</html>

@@ -39,6 +39,13 @@
             font-weight: 700;
             font-size: 13px;
         }
+
+        .filter-card {
+            border: 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(88, 28, 135, 0.06);
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -55,11 +62,15 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <a href="/dashboard/company-owner" class="btn btn-outline-light rounded-pill px-4">
+                    <a th:href="@{/dashboard/company-owner}" class="btn btn-outline-light rounded-pill px-4">
                         Dashboard
                     </a>
 
-                    <a href="/company/users/create" class="btn btn-light rounded-pill px-4 fw-bold">
+                    <a th:href="@{/company/profile}" class="btn btn-outline-light rounded-pill px-4">
+                        Company Profile
+                    </a>
+
+                    <a th:href="@{/company/users/create}" class="btn btn-light rounded-pill px-4 fw-bold">
                         + Add Member
                     </a>
                 </div>
@@ -67,6 +78,46 @@
         </section>
 
         <div th:if="${success}" class="alert alert-success rounded-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger rounded-4" th:text="${error}"></div>
+
+        <div class="card filter-card">
+            <div class="card-body p-4">
+                <form method="get" th:action="@{/company/users}" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Search</label>
+                        <input class="form-control" name="keyword" placeholder="Username, full name, email, phone"
+                            th:value="${keyword}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Role</label>
+                        <select class="form-select" name="role">
+                            <option value="">All roles</option>
+                            <option value="HR" th:selected="${role == 'HR'}">HR</option>
+                            <option value="INTERVIEWER" th:selected="${role == 'INTERVIEWER'}">INTERVIEWER</option>
+                            <option value="VIEWER" th:selected="${role == 'VIEWER'}">VIEWER</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="">All status</option>
+                            <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">ACTIVE</option>
+                            <option value="LOCKED" th:selected="${status == 'LOCKED'}">LOCKED</option>
+                            <option value="INVITED" th:selected="${status == 'INVITED'}">INVITED</option>
+                            <option value="PENDING" th:selected="${status == 'PENDING'}">PENDING</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100 rounded-pill" type="submit">
+                            Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <div class="card card-soft">
             <div class="card-body p-4">
@@ -85,14 +136,15 @@
                         </thead>
 
                         <tbody>
-                            <tr th:each="user : ${users}">
+                            <tr th:each="user : ${userPage.records}">
                                 <td th:text="${user.id}">1</td>
 
                                 <td>
                                     <div class="fw-bold"
-                                        th:text="${user.fullName != null ? user.fullName : user.username}">
+                                        th:text="${user.fullName != null and !#strings.isEmpty(user.fullName) ? user.fullName : user.username}">
                                         Full Name
                                     </div>
+
                                     <div class="small text-muted" th:text="${user.username}">
                                         username
                                     </div>
@@ -108,30 +160,40 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-success role-badge" th:text="${user.status}">
+                                    <span th:if="${user.status == 'ACTIVE'}" class="badge bg-success role-badge"
+                                        th:text="${user.status}">
                                         ACTIVE
+                                    </span>
+
+                                    <span th:if="${user.status == 'LOCKED'}" class="badge bg-danger role-badge"
+                                        th:text="${user.status}">
+                                        LOCKED
+                                    </span>
+
+                                    <span th:if="${user.status != 'ACTIVE' and user.status != 'LOCKED'}"
+                                        class="badge bg-secondary role-badge" th:text="${user.status}">
+                                        OTHER
                                     </span>
                                 </td>
 
                                 <td>
                                     <div class="d-flex flex-wrap gap-2">
-                                        <form th:action="@{/company/users/{id}/role(id=${user.id})}" method="post"
-                                            class="d-flex gap-2">
-                                            <select name="role" class="form-select form-select-sm">
-                                                <option value="HR" th:selected="${user.role == 'HR'}">HR</option>
-                                                <option value="INTERVIEWER" th:selected="${user.role == 'INTERVIEWER'}">
-                                                    INTERVIEWER
-                                                </option>
-                                                <option value="VIEWER" th:selected="${user.role == 'VIEWER'}">VIEWER
-                                                </option>
-                                            </select>
-
-                                            <button class="btn btn-sm btn-outline-primary" type="submit">
-                                                Save
+                                        <form th:if="${user.status != 'LOCKED'}"
+                                            th:action="@{'/company/users/lock/' + ${user.id}}" method="post"
+                                            onsubmit="return confirm('Lock this member?');">
+                                            <button class="btn btn-sm btn-outline-warning" type="submit">
+                                                Lock
                                             </button>
                                         </form>
 
-                                        <form th:action="@{/company/users/{id}/delete(id=${user.id})}" method="post"
+                                        <form th:if="${user.status == 'LOCKED'}"
+                                            th:action="@{'/company/users/unlock/' + ${user.id}}" method="post">
+                                            <button class="btn btn-sm btn-outline-success" type="submit">
+                                                Unlock
+                                            </button>
+                                        </form>
+
+                                        <form th:action="@{'/company/users/delete/' + ${user.id}}" method="post"
                                             onsubmit="return confirm('Delete this member?');">
                                             <button class="btn btn-sm btn-outline-danger" type="submit">
                                                 Delete
@@ -141,13 +203,34 @@
                                 </td>
                             </tr>
 
-                            <tr th:if="${#lists.isEmpty(users)}">
+                            <tr th:if="${userPage == null or #lists.isEmpty(userPage.records)}">
                                 <td colspan="7" class="text-center text-muted py-4">
                                     Chưa có thành viên nào trong công ty.
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div th:if="${userPage != null}" class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        Page
+                        <span th:text="${userPage.current}">1</span>
+                        /
+                        <span th:text="${userPage.pages}">1</span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-secondary btn-sm" th:if="${userPage.current > 1}"
+                            th:href="@{/company/users(page=${userPage.current - 1}, keyword=${keyword}, role=${role}, status=${status})}">
+                            Previous
+                        </a>
+
+                        <a class="btn btn-outline-secondary btn-sm" th:if="${userPage.current < userPage.pages}"
+                            th:href="@{/company/users(page=${userPage.current + 1}, keyword=${keyword}, role=${role}, status=${status})}">
+                            Next
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -53,6 +53,8 @@ public class SecurityConfig {
                                                 .permitAll()
 
                                                 // PLATFORM ADMIN
+                                                .requestMatchers(antMatcher("/admin/companies/**"))
+                                                .hasRole("PLATFORM_ADMIN")
                                                 .requestMatchers(antMatcher("/admin/**"))
                                                 .hasRole("PLATFORM_ADMIN")
 
@@ -60,12 +62,14 @@ public class SecurityConfig {
                                                 .hasRole("PLATFORM_ADMIN")
 
                                                 // COMPANY OWNER
-                                                .requestMatchers(antMatcher("/company/**"))
+                                                .requestMatchers(antMatcher("/company/profile"))
+                                                .hasRole("COMPANY_OWNER")
+
+                                                .requestMatchers(antMatcher("/company/users/**"))
                                                 .hasRole("COMPANY_OWNER")
 
                                                 .requestMatchers(antMatcher("/dashboard/company-owner"))
                                                 .hasRole("COMPANY_OWNER")
-
                                                 // JOBS
                                                 .requestMatchers(antMatcher("/jobs/create"),
                                                                 antMatcher("/jobs/edit/**"),

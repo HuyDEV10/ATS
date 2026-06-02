@@ -63,16 +63,24 @@
                 <div>
                     <h2 class="fw-bold mb-2">Company Profile</h2>
                     <p class="mb-0">
-                        Cập nhật 6 thông tin chính của công ty để hiển thị trong hệ thống tuyển dụng.
+                        Cập nhật thông tin công ty để hiển thị trong hệ thống tuyển dụng.
                     </p>
                 </div>
-                <a href="/dashboard/company-owner" class="btn btn-light rounded-pill px-4 fw-bold">
-                    Back to Dashboard
-                </a>
+
+                <div class="d-flex gap-2">
+                    <a th:href="@{/company/users}" class="btn btn-outline-light rounded-pill px-4 fw-bold">
+                        Manage Users
+                    </a>
+
+                    <a th:href="@{/dashboard/company-owner}" class="btn btn-light rounded-pill px-4 fw-bold">
+                        Back to Dashboard
+                    </a>
+                </div>
             </div>
         </div>
 
         <div th:if="${success}" class="alert alert-success rounded-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger rounded-4" th:text="${error}"></div>
 
         <form method="post" th:action="@{/company/profile}" th:object="${company}" class="card profile-card">
             <div class="card-body p-4 p-lg-5">
@@ -80,19 +88,32 @@
                     <div class="logo-preview">
                         <img th:if="${company.logoUrl != null and !#strings.isEmpty(company.logoUrl)}"
                             th:src="${company.logoUrl}" alt="Company logo">
-                        <span th:if="${company.logoUrl == null or #strings.isEmpty(company.logoUrl)}">🏢</span>
+
+                        <span th:if="${company.logoUrl == null or #strings.isEmpty(company.logoUrl)}">
+                            🏢
+                        </span>
                     </div>
 
                     <div>
-                        <h4 class="mb-1" th:text="${company.name} ?: 'Company Name'">Company Name</h4>
-                        <p class="text-muted mb-0" th:text="${company.industry} ?: 'Industry'">Industry</p>
+                        <h4 class="mb-1" th:text="${company.name} ?: 'Company Name'">
+                            Company Name
+                        </h4>
+
+                        <p class="text-muted mb-0" th:text="${company.industry} ?: 'Industry'">
+                            Industry
+                        </p>
+
+                        <span class="badge bg-success mt-2" th:text="${company.status}">
+                            ACTIVE
+                        </span>
                     </div>
                 </div>
 
                 <div class="row g-4">
                     <div class="col-md-6">
                         <label class="form-label">1. Company Name</label>
-                        <input class="form-control form-control-lg" th:field="*{name}" required>
+                        <input class="form-control form-control-lg" th:field="*{name}" placeholder="SmartATS Company"
+                            required>
                     </div>
 
                     <div class="col-md-6">
