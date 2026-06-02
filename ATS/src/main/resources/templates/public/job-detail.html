@@ -2,73 +2,177 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Chi tiết việc làm</title>
+    <meta charset="UTF-8">
+    <title>Chi tiết việc làm - SmartATS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f3ff;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .page-shell {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 32px 16px;
+        }
+
+        .job-hero {
+            background: linear-gradient(135deg, #5b21b6, #7c3aed);
+            color: white;
+            border-radius: 28px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .soft-card {
+            border: 0;
+            border-radius: 24px;
+            box-shadow: 0 14px 40px rgba(88, 28, 135, 0.08);
+        }
+
+        .rule-box {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 20px;
+            padding: 18px;
+        }
+
+        .rule-box li {
+            margin-bottom: 8px;
+        }
+
+        label {
+            font-weight: 700;
+            color: #374151;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container py-4">
+    <div class="page-shell">
 
-        <h2 th:text="${job.title}"></h2>
+        <div class="job-hero">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h2 class="fw-bold mb-3" th:text="${job.title}">Job title</h2>
 
-        <p>
-            <strong>Phòng ban:</strong>
-            <span th:text="${job.department}"></span>
-        </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                            Phòng ban:
+                            <span th:text="${job.department}">Engineering</span>
+                        </span>
 
-        <p>
-            <strong>Địa điểm:</strong>
-            <span th:text="${job.location}"></span>
-        </p>
+                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                            Địa điểm:
+                            <span th:text="${job.location}">Da Nang</span>
+                        </span>
 
-        <p>
-            <strong>Lương:</strong>
-            <span th:text="${job.salaryRange}"></span>
-        </p>
+                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                            Lương:
+                            <span th:text="${job.salaryRange}">Negotiable</span>
+                        </span>
+                    </div>
+                </div>
 
-        <div class="card p-3 mb-4">
-            <h5>Mô tả công việc</h5>
-            <p th:text="${job.description}"></p>
+                <a th:href="@{/public/jobs}" class="btn btn-light rounded-pill px-4 fw-bold">
+                    Back to jobs
+                </a>
+            </div>
         </div>
 
-        <div class="card p-4">
-            <h4>Ứng tuyển vị trí này</h4>
-            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-            <form th:action="@{/public/apply/{id}(id=${job.id})}" method="post" enctype="multipart/form-data">
+        <div th:if="${success}" class="alert alert-success rounded-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger rounded-4" th:text="${error}"></div>
 
-                <div class="mb-3">
-                    <label>Họ tên</label>
-                    <input name="name" class="form-control" required>
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card soft-card mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Mô tả công việc</h4>
+                        <p class="mb-0" th:text="${job.description}">
+                            Job description...
+                        </p>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input name="email" type="email" class="form-control" required>
-                </div>
+                <div class="rule-box">
+                    <h5 class="fw-bold mb-3">Ràng buộc CV trước khi ứng tuyển</h5>
 
-                <div class="mb-3">
-                    <label>Số điện thoại</label>
-                    <input name="phone" class="form-control">
+                    <ul class="mb-0">
+                        <li>Chỉ chấp nhận file <strong>PDF, DOC, DOCX</strong>.</li>
+                        <li>Dung lượng tối đa <strong>10MB</strong>.</li>
+                        <li>Không upload ảnh, file nén ZIP/RAR, file scan mờ hoặc file không phải CV.</li>
+                        <li>Email và số điện thoại trong form nên trùng với thông tin trong CV.</li>
+                        <li>CV nên có các phần: thông tin cá nhân, kỹ năng, kinh nghiệm, học vấn, dự án.</li>
+                        <li>Nếu hệ thống không đọc được CV, hồ sơ vẫn được gửi nhưng HR sẽ phải kiểm tra thủ công.</li>
+                    </ul>
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label>Kỹ năng</label>
-                    <input name="skills" class="form-control" placeholder="Java, Spring Boot, MySQL">
+            <div class="col-lg-5">
+                <div class="card soft-card">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-2">Ứng tuyển vị trí này</h4>
+
+                        <p class="text-muted mb-4">
+                            Vui lòng nhập thông tin cơ bản và tải lên CV đúng định dạng.
+                        </p>
+
+                        <form th:action="@{/public/apply/{id}(id=${job.id})}" method="post"
+                            enctype="multipart/form-data">
+
+                            <div class="mb-3">
+                                <label class="form-label">Họ tên *</label>
+                                <input name="name" class="form-control form-control-lg" placeholder="Nguyễn Văn A"
+                                    required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input name="email" type="email" class="form-control form-control-lg"
+                                    placeholder="candidate@email.com" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input name="phone" class="form-control form-control-lg" placeholder="090xxxxxxx">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Kỹ năng nổi bật</label>
+                                <input name="skills" class="form-control form-control-lg"
+                                    placeholder="Java, Spring Boot, MySQL">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Số năm kinh nghiệm</label>
+                                <input name="experienceYears" type="number" min="0" class="form-control form-control-lg"
+                                    value="0">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">CV *</label>
+                                <input name="file" type="file" class="form-control form-control-lg"
+                                    accept=".pdf,.doc,.docx" required>
+
+                                <div class="form-text">
+                                    File hợp lệ: PDF, DOC, DOCX. Tối đa 10MB.
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning rounded-4">
+                                <strong>Lưu ý:</strong>
+                                Nếu CV khác email/số điện thoại trong form, HR có thể yêu cầu xác nhận lại thông tin.
+                            </div>
+
+                            <button class="btn btn-success btn-lg rounded-pill w-100" type="submit">
+                                Nộp hồ sơ
+                            </button>
+                        </form>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label>Số năm kinh nghiệm</label>
-                    <input name="experienceYears" type="number" class="form-control" value="0">
-                </div>
-
-                <div class="mb-3">
-                    <label>CV</label>
-                    <input name="file" type="file" class="form-control" required>
-                </div>
-
-                <button class="btn btn-success">Nộp hồ sơ</button>
-            </form>
+            </div>
         </div>
 
     </div>
