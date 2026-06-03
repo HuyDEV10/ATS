@@ -4,36 +4,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Chi tiết Đơn ứng tuyển - SmartATS</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <style>
         body {
             background:
-                linear-gradient(135deg,
-                    rgba(13, 110, 253, 0.04),
-                    rgba(13, 202, 240, 0.03)),
+                linear-gradient(135deg, rgba(13, 110, 253, 0.04), rgba(13, 202, 240, 0.03)),
                 #f4f7fb;
-
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: #1e293b;
         }
 
         .main-container {
-            max-width: 1100px;
-            padding-top: 50px;
+            max-width: 1180px;
+            padding-top: 42px;
             padding-bottom: 50px;
         }
 
-        .top-bar {
+        .top-bar,
+        .info-card {
             background: white;
+            border: none;
             border-radius: 24px;
-            padding: 24px 28px;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        .top-bar {
+            padding: 24px 28px;
         }
 
         .top-actions .btn {
@@ -58,20 +58,8 @@
             margin-bottom: 10px;
         }
 
-        .info-card {
-            border: none;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
-            transition: all 0.25s ease;
-        }
-
-        .info-card:hover {
-            transform: translateY(-4px);
-        }
-
         .card-body {
-            padding: 30px;
+            padding: 28px;
         }
 
         .section-title {
@@ -98,25 +86,85 @@
             color: #64748b;
         }
 
-        .notes-box {
-            background: #fff8e7;
-            border-left: 5px solid #ffc107;
+        .notes-box,
+        .pre-line-box {
+            background: #f8fafc;
+            border-left: 5px solid #0d6efd;
             border-radius: 16px;
-            padding: 24px;
+            padding: 18px;
             white-space: pre-line;
             line-height: 1.8;
         }
 
-        .btn-outline-primary,
-        .btn-outline-secondary {
-            border-radius: 12px;
-            font-weight: 600;
+        .notes-box {
+            background: #fff8e7;
+            border-left-color: #ffc107;
         }
 
-        .print-btn {
-            border-radius: 12px;
-            padding: 10px 18px;
-            font-weight: 600;
+        .score-circle {
+            width: 132px;
+            height: 132px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 16px 36px rgba(25, 135, 84, 0.22);
+        }
+
+        .score-circle .score-number {
+            font-size: 38px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .score-circle .score-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .metric-box {
+            border-radius: 18px;
+            background: #f8fafc;
+            padding: 18px;
+            height: 100%;
+        }
+
+        .metric-value {
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .evidence-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 14px;
+            background: #ffffff;
+        }
+
+        .evidence-card .criterion {
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .badge-soft {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 700;
+        }
+
+        .small-muted {
+            font-size: 13px;
+            color: #64748b;
         }
 
         @media (max-width: 768px) {
@@ -127,10 +175,7 @@
                 gap: 20px;
             }
 
-            .top-actions {
-                width: 100%;
-            }
-
+            .top-actions,
             .top-actions .btn,
             .top-actions form {
                 width: 100%;
@@ -148,230 +193,670 @@
 
     <div class="container main-container">
 
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success rounded-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger rounded-4" th:text="${error}"></div>
+
+        <!-- Top bar -->
         <div class="top-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
 
             <a href="/applications" class="btn btn-link text-decoration-none text-muted fw-semibold">
-
                 <i class="bi bi-arrow-left"></i>
                 Quay lại danh sách
-
             </a>
 
             <div class="d-flex gap-2 flex-wrap top-actions">
 
-                <!-- AI Screening -->
                 <form th:action="@{/ai/score/{id}(id=${details.application.id})}" method="post">
-
                     <button type="submit" class="btn btn-success shadow-sm">
-
                         <i class="bi bi-robot"></i>
                         AI Screening
-
                     </button>
-
                 </form>
 
-                <!-- Assign Interviewer -->
                 <a th:href="@{/interviews/assign(applicationId=${details.application.id})}"
                     class="btn btn-dark shadow-sm">
-
                     <i class="bi bi-person-check"></i>
                     Gán Interviewer
-
                 </a>
 
-                <!-- Edit -->
                 <a th:href="@{/applications/edit/{id}(id=${details.application.id})}" class="btn btn-warning shadow-sm">
-
                     <i class="bi bi-pencil-square"></i>
                     Chỉnh sửa đơn
-
                 </a>
 
-                <!-- Interviews -->
                 <a th:href="@{/interviews(applicationId=${details.application.id})}"
                     class="btn btn-info shadow-sm text-white">
-
                     <i class="bi bi-calendar-check"></i>
                     Xem lịch phỏng vấn
-
                 </a>
 
             </div>
-
         </div>
 
-        <div class="status-banner shadow-sm"
-            th:classappend="${details.application.status == 'OFFERED' ? 'bg-success' : (details.application.status == 'REJECTED' ? 'bg-danger' : 'bg-primary')}">
+        <!-- Status banner -->
+        <div class="status-banner shadow-sm" th:classappend="${details.application.status == 'OFFERED' || details.application.status == 'HIRED'
+            ? 'bg-success'
+            : (details.application.status == 'REJECTED' ? 'bg-danger' : 'bg-primary')}">
 
             <div>
-
                 <h4>
-
                     <i class="bi bi-info-circle-fill me-2"></i>
-
                     Trạng thái hiện tại:
-                    <span th:text="${details.application.status}">
-                        STATUS
-                    </span>
-
+                    <span th:text="${details.application.status}">STATUS</span>
                 </h4>
 
                 <small class="opacity-75">
-
                     Ngày nộp đơn:
-
                     <span th:text="${#temporals.format(details.application.applicationDate, 'dd/MM/yyyy HH:mm')}">
                         DATE
                     </span>
-
                 </small>
-
             </div>
 
             <i class="bi bi-person-badge display-4"></i>
-
         </div>
 
         <div class="row g-4 mt-1">
 
             <!-- Candidate -->
-
             <div class="col-md-6">
-
                 <div class="card info-card h-100">
-
                     <div class="card-body">
-
                         <div class="section-title">
-
                             <i class="bi bi-person-bounding-box me-2"></i>
-
                             Thông tin Ứng viên
-
                         </div>
 
                         <div class="candidate-name" th:text="${details.candidate.name}">
                             Candidate Name
                         </div>
 
-                        <p class="info-text mb-4">
-
+                        <p class="info-text mb-2">
                             <i class="bi bi-envelope me-1"></i>
+                            <span th:text="${details.candidate.email}">Email</span>
+                        </p>
 
-                            <span th:text="${details.candidate.email}">
-                                Email
+                        <p class="info-text mb-2">
+                            <i class="bi bi-phone me-1"></i>
+                            <span
+                                th:text="${details.candidate.phone != null ? details.candidate.phone : 'Chưa có số điện thoại'}">
+                                Phone
                             </span>
+                        </p>
 
+                        <p class="info-text mb-4">
+                            <i class="bi bi-tools me-1"></i>
+                            <span
+                                th:text="${details.candidate.skills != null ? details.candidate.skills : 'Chưa khai báo kỹ năng'}">
+                                Skills
+                            </span>
                         </p>
 
                         <a th:href="@{/candidates/view/{id}(id=${details.candidate.id})}"
                             class="btn btn-outline-primary rounded-pill px-4">
-
                             Xem hồ sơ đầy đủ
-
                         </a>
 
+                        <a th:href="@{/verifications/candidate/{id}(id=${details.candidate.id})}"
+                            class="btn btn-outline-success rounded-pill px-4 ms-2">
+                            Xác thực kỹ năng
+                        </a>
                     </div>
-
                 </div>
-
             </div>
 
             <!-- Job -->
-
             <div class="col-md-6">
-
                 <div class="card info-card h-100">
-
                     <div class="card-body">
-
                         <div class="section-title">
-
                             <i class="bi bi-briefcase me-2"></i>
-
                             Vị trí ứng tuyển
-
                         </div>
 
                         <div class="job-title" th:text="${details.job.title}">
                             Job Title
                         </div>
 
-                        <p class="info-text mb-4">
-
+                        <p class="info-text mb-2">
                             <i class="bi bi-tag me-1"></i>
-
                             ID Công việc:
+                            #<span th:text="${details.job.id}">ID</span>
+                        </p>
 
-                            #<span th:text="${details.job.id}">
-                                ID
+                        <p class="info-text mb-2">
+                            <i class="bi bi-building me-1"></i>
+                            Phòng ban:
+                            <span th:text="${details.job.department != null ? details.job.department : 'Chưa có'}">
+                                Department
                             </span>
+                        </p>
 
+                        <p class="info-text mb-4">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            Địa điểm:
+                            <span th:text="${details.job.location != null ? details.job.location : 'Chưa có'}">
+                                Location
+                            </span>
                         </p>
 
                         <a th:href="@{/jobs/view/{id}(id=${details.job.id})}"
                             class="btn btn-outline-primary rounded-pill px-4">
-
                             Xem chi tiết Job
-
                         </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification / mismatch -->
+            <div class="col-12">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class="section-title">
+                            <i class="bi bi-shield-check me-2"></i>
+                            CV/Form Verification
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="metric-box">
+                                    <div class="metric-label">Verification status</div>
+                                    <div class="mt-2">
+                                        <span class="badge badge-soft" th:classappend="${details.application.verificationStatus == 'IDENTITY_CONFLICT'
+                                            ? ' bg-danger'
+                                            : (details.application.verificationStatus == 'NEEDS_REVIEW'
+                                                ? ' bg-warning text-dark'
+                                                : ' bg-success')}"
+                                            th:text="${details.application.verificationStatus != null ? details.application.verificationStatus : 'NOT_CHECKED'}">
+                                            STATUS
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="metric-box">
+                                    <div class="metric-label">Mismatch score</div>
+                                    <div class="metric-value"
+                                        th:text="${details.application.mismatchScore != null ? details.application.mismatchScore : 0}">
+                                        0
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="metric-box">
+                                    <div class="metric-label">Resume ID</div>
+                                    <div class="metric-value"
+                                        th:text="${details.application.resumeId != null ? details.application.resumeId : 'N/A'}">
+                                        0
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="pre-line-box"
+                                th:text="${details.application.mismatchSummary != null ? details.application.mismatchSummary : 'Chưa có thông tin xác minh CV/Form.'}">
+                                Summary
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Actions -->
+            <div class="col-12">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class="section-title">
+                            <i class="bi bi-shield-lock me-2"></i>
+                            Verification Actions
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-lg-5">
+                                <div class="metric-box">
+                                    <div class="metric-label">Current verification status</div>
+
+                                    <div class="mt-2">
+                                        <span class="badge badge-soft" th:classappend="${details.application.verificationStatus == 'IDENTITY_CONFLICT'
+                                            ? ' bg-danger'
+                                            : (details.application.verificationStatus == 'NEEDS_REVIEW'
+                                                ? ' bg-warning text-dark'
+                                                : ' bg-success')}"
+                                            th:text="${details.application.verificationStatus != null ? details.application.verificationStatus : 'NOT_CHECKED'}">
+                                            STATUS
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 pre-line-box"
+                                    th:text="${details.application.mismatchSummary != null ? details.application.mismatchSummary : 'Chưa có mismatch summary.'}">
+                                    Mismatch summary
+                                </div>
+                            </div>
+
+                            <div class="col-lg-7">
+                                <form
+                                    th:action="@{/applications/{id}/verification-action(id=${details.application.id})}"
+                                    method="post">
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Verification Action</label>
+
+                                        <select name="action" class="form-select form-select-lg" required>
+                                            <option value="CONFIRM_VERIFIED">
+                                                CONFIRM_VERIFIED - Xác nhận thông tin CV/Form hợp lệ
+                                            </option>
+                                            <option value="REQUEST_UPDATE">
+                                                REQUEST_UPDATE - Yêu cầu ứng viên cập nhật/xác minh lại
+                                            </option>
+                                            <option value="MARK_CONFLICT">
+                                                MARK_CONFLICT - Đánh dấu xung đột thông tin
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Verification note</label>
+
+                                        <textarea name="note" rows="4" class="form-control"
+                                            placeholder="Ví dụ: Email trong CV khác email trong form, cần ứng viên xác nhận lại."></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                        Cập nhật Verification
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
 
                     </div>
-
                 </div>
+            </div>
 
+            <!-- AI score -->
+            <div class="col-12">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class="section-title">
+                            <i class="bi bi-robot me-2"></i>
+                            Kết quả AI Screening mới nhất
+                        </div>
+
+                        <div th:if="${latestScore == null}" class="text-center py-5 text-muted">
+                            <i class="bi bi-robot display-5 d-block mb-3"></i>
+                            Chưa có kết quả AI Screening cho đơn ứng tuyển này.
+
+                            <div class="mt-3">
+                                <form th:action="@{/ai/score/{id}(id=${details.application.id})}" method="post">
+                                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                                        Chạy AI Screening ngay
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div th:if="${latestScore != null}">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-md-3 d-flex justify-content-center">
+                                    <div class="score-circle">
+                                        <div class="score-number" th:text="${latestScore.overallScore}">0</div>
+                                        <div class="score-label">Overall Score</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="metric-box">
+                                                <div class="metric-label">Skill Score</div>
+                                                <div class="metric-value" th:text="${latestScore.skillScore}">0</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="metric-box">
+                                                <div class="metric-label">Experience Score</div>
+                                                <div class="metric-value" th:text="${latestScore.experienceScore}">0
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="metric-box">
+                                                <div class="metric-label">Keyword Score</div>
+                                                <div class="metric-value" th:text="${latestScore.keywordScore}">0</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <strong>Recommendation:</strong>
+                                        <span class="badge bg-primary rounded-pill px-3 py-2"
+                                            th:text="${latestScore.recommendation}">
+                                            Recommendation
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-2 text-muted">
+                                        <small>
+                                            Algorithm:
+                                            <span th:text="${latestScore.algorithmVersion}">Algorithm</span>
+                                            |
+                                            Prompt:
+                                            <span th:text="${latestScore.promptVersion}">Prompt</span>
+                                            |
+                                            Time:
+                                            <span
+                                                th:text="${#temporals.format(latestScore.scoreTime, 'dd/MM/yyyy HH:mm')}">
+                                                Time
+                                            </span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-success">Matched skills</h6>
+                                    <div class="pre-line-box"
+                                        th:text="${latestScore.matchedSkills != null ? latestScore.matchedSkills : 'Chưa có matched skills.'}">
+                                        Matched skills
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-danger">Missing skills</h6>
+                                    <div class="pre-line-box"
+                                        th:text="${latestScore.missingSkills != null ? latestScore.missingSkills : 'Chưa có missing skills.'}">
+                                        Missing skills
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Strengths</h6>
+                                    <div class="pre-line-box"
+                                        th:text="${latestScore.strengths != null ? latestScore.strengths : 'Chưa có strengths.'}">
+                                        Strengths
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold">Weaknesses</h6>
+                                    <div class="pre-line-box"
+                                        th:text="${latestScore.weaknesses != null ? latestScore.weaknesses : 'Chưa có weaknesses.'}">
+                                        Weaknesses
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <h6 class="fw-bold">Interview Questions</h6>
+                                    <div class="pre-line-box"
+                                        th:text="${latestScore.interviewQuestions != null ? latestScore.interviewQuestions : 'Chưa có câu hỏi phỏng vấn.'}">
+                                        Interview questions
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="fw-bold mb-3">Score Details / Evidence</h5>
+
+                            <div th:if="${scoreDetails == null or scoreDetails.isEmpty()}" class="text-muted">
+                                Chưa có score detail.
+                            </div>
+
+                            <div th:each="detail : ${scoreDetails}" class="evidence-card">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                    <div>
+                                        <div class="criterion" th:text="${detail.criterion}">
+                                            criterion
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            Weight:
+                                            <span th:text="${detail.weight}">0</span>%
+                                        </div>
+                                    </div>
+
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        Score:
+                                        <span th:text="${detail.score}">0</span>
+                                    </span>
+                                </div>
+
+                                <div class="mt-3">
+                                    <strong>Evidence:</strong>
+                                    <div class="pre-line-box mt-2"
+                                        th:text="${detail.evidence != null ? detail.evidence : 'Chưa có evidence.'}">
+                                        evidence
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <strong>Explanation:</strong>
+                                    <div class="pre-line-box mt-2"
+                                        th:text="${detail.explanation != null ? detail.explanation : 'Chưa có explanation.'}">
+                                        explanation
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HR AI Review -->
+            <div class="col-12">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class="section-title">
+                            <i class="bi bi-person-check me-2"></i>
+                            HR Review AI Recommendation
+                        </div>
+
+                        <div th:if="${latestScore == null}" class="alert alert-warning rounded-4 mb-0">
+                            Cần chạy AI Screening trước khi HR review AI recommendation.
+                        </div>
+
+                        <div th:if="${latestScore != null}">
+                            <div class="row g-4">
+                                <div class="col-lg-5">
+                                    <div class="metric-box">
+                                        <div class="metric-label">AI Recommendation</div>
+                                        <div class="mt-2">
+                                            <span class="badge bg-primary rounded-pill px-3 py-2"
+                                                th:text="${latestScore.recommendation}">
+                                                Recommendation
+                                            </span>
+                                        </div>
+
+                                        <div class="small-muted mt-3">
+                                            AI chỉ đưa ra đề xuất. HR là người quyết định cuối cùng.
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3" th:if="${latestAiReview != null}">
+                                        <div class="alert alert-info rounded-4 mb-0">
+                                            <div class="fw-bold mb-1">Latest HR AI Review</div>
+
+                                            <div>
+                                                Decision:
+                                                <strong th:text="${latestAiReview.decision}">APPROVE_AI</strong>
+                                            </div>
+
+                                            <div th:if="${latestAiReview.reason != null}">
+                                                Reason:
+                                                <span th:text="${latestAiReview.reason}">Reason</span>
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Reviewed at:
+                                                <span
+                                                    th:text="${#temporals.format(latestAiReview.reviewedAt, 'dd/MM/yyyy HH:mm')}">
+                                                    Time
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3" th:if="${latestAiReview == null}">
+                                        <div class="alert alert-secondary rounded-4 mb-0">
+                                            HR chưa review AI recommendation cho application này.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-7">
+                                    <form th:action="@{/applications/{id}/ai-review(id=${details.application.id})}"
+                                        method="post">
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">HR Decision</label>
+
+                                            <select name="decision" class="form-select form-select-lg" required>
+                                                <option value="APPROVE_AI">
+                                                    APPROVE_AI - Đồng ý với đề xuất AI
+                                                </option>
+                                                <option value="REJECT_AI">
+                                                    REJECT_AI - Không đồng ý với đề xuất AI
+                                                </option>
+                                                <option value="OVERRIDE_TO_INTERVIEW">
+                                                    OVERRIDE_TO_INTERVIEW - HR vẫn muốn phỏng vấn
+                                                </option>
+                                                <option value="OVERRIDE_TO_REJECT">
+                                                    OVERRIDE_TO_REJECT - HR muốn từ chối
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Reason / Ghi chú quyết định</label>
+
+                                            <textarea name="reason" rows="4" class="form-control"
+                                                placeholder="Ví dụ: Ứng viên thiếu Docker nhưng có kinh nghiệm Spring Boot tốt nên vẫn nên phỏng vấn."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success rounded-pill px-4">
+                                            Lưu HR Review
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change status -->
+            <div class="col-12">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <div class="section-title">
+                            <i class="bi bi-arrow-repeat me-2"></i>
+                            Cập nhật trạng thái ứng tuyển
+                        </div>
+
+                        <form th:action="@{/applications/change-status/{id}(id=${details.application.id})}"
+                            method="post">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Trạng thái mới</label>
+
+                                    <select name="status" class="form-select form-select-lg" required>
+                                        <option value="PENDING"
+                                            th:selected="${details.application.status == 'PENDING'}">
+                                            PENDING
+                                        </option>
+                                        <option value="AI_SCREENED"
+                                            th:selected="${details.application.status == 'AI_SCREENED'}">
+                                            AI_SCREENED
+                                        </option>
+                                        <option value="SHORTLISTED"
+                                            th:selected="${details.application.status == 'SHORTLISTED'}">
+                                            SHORTLISTED
+                                        </option>
+                                        <option value="INTERVIEW_SCHEDULED"
+                                            th:selected="${details.application.status == 'INTERVIEW_SCHEDULED'}">
+                                            INTERVIEW_SCHEDULED
+                                        </option>
+                                        <option value="INTERVIEWED"
+                                            th:selected="${details.application.status == 'INTERVIEWED'}">
+                                            INTERVIEWED
+                                        </option>
+                                        <option value="OFFERED"
+                                            th:selected="${details.application.status == 'OFFERED'}">
+                                            OFFERED
+                                        </option>
+                                        <option value="HIRED" th:selected="${details.application.status == 'HIRED'}">
+                                            HIRED
+                                        </option>
+                                        <option value="REJECTED"
+                                            th:selected="${details.application.status == 'REJECTED'}">
+                                            REJECTED
+                                        </option>
+                                    </select>
+
+                                    <div class="form-text">
+                                        Nếu bị lỗi, hãy chuyển theo đúng pipeline hợp lệ.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold">Ghi chú HR</label>
+
+                                    <textarea name="hrNotes" class="form-control" rows="4"
+                                        placeholder="Nhập ghi chú khi chuyển trạng thái..."
+                                        th:text="${details.application.hrNotes}"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 text-end">
+                                <button class="btn btn-primary rounded-pill px-4" type="submit">
+                                    Cập nhật trạng thái
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- HR Notes -->
-
             <div class="col-12">
-
                 <div class="card info-card">
-
                     <div class="card-body">
-
                         <div class="section-title">
-
                             <i class="bi bi-chat-left-dots me-2"></i>
-
-                            Nhận xét từ HR (HR Notes)
-
+                            Nhận xét từ HR
                         </div>
 
                         <div th:if="${not #strings.isEmpty(details.application.hrNotes)}" class="notes-box">
-
                             <span th:text="${details.application.hrNotes}">
                                 Notes text here...
                             </span>
-
                         </div>
 
                         <div th:if="${#strings.isEmpty(details.application.hrNotes)}"
                             class="text-muted text-center py-5">
-
                             Chưa có ghi chú nào cho đơn ứng tuyển này.
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
         </div>
 
         <div class="mt-5 text-center">
-
-            <button class="btn btn-outline-secondary print-btn" onclick="window.print()">
-
+            <button class="btn btn-outline-secondary rounded-pill px-4" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i>
-
                 Xuất file phỏng vấn
-
             </button>
-
         </div>
 
     </div>

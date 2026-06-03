@@ -11,19 +11,14 @@
 
     <style>
         body {
-            background:
-                linear-gradient(135deg,
-                    rgba(13, 110, 253, 0.04),
-                    rgba(13, 202, 240, 0.03)),
-                #f4f7fb;
-
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.04), rgba(13, 202, 240, 0.03)), #f4f7fb;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: #1e293b;
             min-height: 100vh;
         }
 
         .main-container {
-            max-width: 820px;
+            max-width: 920px;
             padding-top: 50px;
             padding-bottom: 50px;
         }
@@ -48,11 +43,6 @@
             margin-bottom: 10px;
         }
 
-        .form-header p {
-            margin-bottom: 0;
-            opacity: 0.92;
-        }
-
         .form-body {
             padding: 40px;
         }
@@ -68,18 +58,11 @@
             min-height: 50px;
             border-radius: 14px;
             border: 1px solid #dbe2ea;
-            transition: all 0.2s ease;
         }
 
         textarea.form-control {
             min-height: 120px;
             padding-top: 14px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.12);
         }
 
         .input-group-text {
@@ -96,25 +79,18 @@
             padding: 12px 22px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #0d6efd, #4f8cff);
-            border: none;
-            transition: all 0.25s ease;
+        .scorecard-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 24px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 22px rgba(13, 110, 253, 0.22);
-        }
-
-        .back-link {
-            font-weight: 700;
-            color: #64748b;
-            text-decoration: none;
-        }
-
-        .back-link:hover {
-            color: #0d6efd;
+        .scorecard-title {
+            font-weight: 900;
+            margin-bottom: 16px;
+            color: #0f172a;
         }
 
         @media (max-width: 768px) {
@@ -134,7 +110,6 @@
         <div class="card interview-card">
 
             <div class="form-header">
-
                 <h1 th:if="${interview.id == null}">
                     <i class="bi bi-calendar-plus me-2"></i>
                     Schedule Interview
@@ -142,246 +117,195 @@
 
                 <h1 th:if="${interview.id != null}">
                     <i class="bi bi-clipboard-check me-2"></i>
-                    Edit Interview Result
+                    Interview Scorecard
                 </h1>
 
-                <p>
+                <p class="mb-0 opacity-75">
                     Quản lý lịch phỏng vấn, kết quả đánh giá và đề xuất tuyển dụng.
                 </p>
-
             </div>
 
             <div class="form-body">
 
+                <!-- Create interview -->
                 <form th:action="@{/interviews/create}" th:method="post" th:object="${interview}"
                     th:unless="${interview.id}">
 
                     <input type="hidden" th:field="*{applicationId}" />
 
                     <div class="row">
-
                         <div class="col-md-6 mb-4">
-
-                            <label class="form-label">
-                                Round
-                                <span class="text-danger">*</span>
-                            </label>
+                            <label class="form-label">Round <span class="text-danger">*</span></label>
 
                             <div class="input-group">
-
                                 <span class="input-group-text">
                                     <i class="bi bi-layers"></i>
                                 </span>
-
                                 <input type="number" th:field="*{round}" class="form-control" placeholder="Ví dụ: 1"
                                     required />
-
                             </div>
-
                         </div>
 
                         <div class="col-md-6 mb-4">
-
-                            <label class="form-label">
-                                Interview Date
-                                <span class="text-danger">*</span>
-                            </label>
+                            <label class="form-label">Interview Date <span class="text-danger">*</span></label>
 
                             <div class="input-group">
-
                                 <span class="input-group-text">
                                     <i class="bi bi-calendar-event"></i>
                                 </span>
-
                                 <input type="datetime-local" th:field="*{interviewDate}" class="form-control"
                                     required />
-
                             </div>
-
                         </div>
 
                         <div class="col-md-6 mb-4">
-
-                            <label class="form-label">
-                                Location
-                            </label>
+                            <label class="form-label">Location</label>
 
                             <div class="input-group">
-
                                 <span class="input-group-text">
                                     <i class="bi bi-geo-alt"></i>
                                 </span>
-
                                 <input type="text" th:field="*{location}" class="form-control"
                                     placeholder="Phòng họp / Địa điểm phỏng vấn" />
-
                             </div>
-
                         </div>
 
                         <div class="col-md-6 mb-4">
-
-                            <label class="form-label">
-                                Meeting Link
-                            </label>
+                            <label class="form-label">Meeting Link</label>
 
                             <div class="input-group">
-
                                 <span class="input-group-text">
                                     <i class="bi bi-camera-video"></i>
                                 </span>
-
                                 <input type="text" th:field="*{meetingLink}" class="form-control"
                                     placeholder="Google Meet / Zoom link" />
-
                             </div>
-
                         </div>
 
                         <div class="col-12 mb-4">
-
-                            <label class="form-label">
-                                Notes
-                            </label>
+                            <label class="form-label">Notes</label>
 
                             <textarea th:field="*{notes}" class="form-control"
                                 placeholder="Ghi chú lịch phỏng vấn, yêu cầu chuẩn bị..."></textarea>
-
                         </div>
+                    </div>
 
+                    <div class="alert alert-info rounded-4">
+                        Sau khi tạo lịch phỏng vấn, hệ thống sẽ gửi email mời phỏng vấn cho ứng viên nếu mail đang bật.
                     </div>
 
                     <div class="d-grid gap-3 d-md-flex justify-content-md-end">
-
                         <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
-
                             Back
-
                         </a>
 
                         <button type="submit" class="btn btn-primary px-5">
-
                             <i class="bi bi-calendar-check me-1"></i>
                             Schedule
-
                         </button>
-
                     </div>
-
                 </form>
 
+                <!-- Edit / scorecard -->
                 <form th:action="@{/interviews/edit/{id}(id=${interview.id})}" th:method="post" th:object="${interview}"
                     th:if="${interview.id}">
 
+                    <input type="hidden" th:field="*{applicationId}" />
+
                     <div class="row">
-
                         <div class="col-md-6 mb-4">
-
-                            <label class="form-label">
-                                Status
-                            </label>
+                            <label class="form-label">Status</label>
 
                             <select th:field="*{status}" class="form-select">
-
-                                <option value="SCHEDULED">
-                                    Scheduled
-                                </option>
-
-                                <option value="COMPLETED">
-                                    Completed
-                                </option>
-
-                                <option value="CANCELLED">
-                                    Cancelled
-                                </option>
-
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
                             </select>
-
                         </div>
 
                         <div class="col-md-6 mb-4">
+                            <label class="form-label">Final Recommendation</label>
 
-                            <label class="form-label">
-                                Score (0-10)
-                            </label>
+                            <select name="finalRecommendation" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="PASS">PASS - Nên đi tiếp</option>
+                                <option value="CONSIDER">CONSIDER - Cân nhắc thêm</option>
+                                <option value="FAIL">FAIL - Không phù hợp</option>
+                            </select>
+                        </div>
+                    </div>
 
-                            <div class="input-group">
+                    <div class="scorecard-box">
+                        <div class="scorecard-title">
+                            <i class="bi bi-ui-checks-grid me-2"></i>
+                            Interview Scorecard
+                        </div>
 
-                                <span class="input-group-text">
-                                    <i class="bi bi-star"></i>
-                                </span>
-
-                                <input type="number" step="1" th:field="*{score}" class="form-control"
-                                    placeholder="0 - 10" />
-
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Technical Skill (1-5)</label>
+                                <input type="number" min="1" max="5" name="technicalScore" class="form-control">
                             </div>
 
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Communication (1-5)</label>
+                                <input type="number" min="1" max="5" name="communicationScore" class="form-control">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Problem Solving (1-5)</label>
+                                <input type="number" min="1" max="5" name="problemSolvingScore" class="form-control">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Experience Fit (1-5)</label>
+                                <input type="number" min="1" max="5" name="experienceFitScore" class="form-control">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Attitude (1-5)</label>
+                                <input type="number" min="1" max="5" name="attitudeScore" class="form-control">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Current Score / 10</label>
+                                <input type="number" th:field="*{score}" class="form-control" readonly>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Scorecard Note</label>
+                                <textarea name="scorecardNote" class="form-control"
+                                    placeholder="Nhận xét theo từng tiêu chí phỏng vấn..."></textarea>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="col-12 mb-4">
+                    <div class="col-12 mb-4">
+                        <label class="form-label">General Feedback</label>
 
-                            <label class="form-label">
-                                Feedback
-                            </label>
+                        <textarea th:field="*{feedback}" class="form-control"
+                            placeholder="Nhận xét tổng quát sau phỏng vấn..."></textarea>
+                    </div>
 
-                            <textarea th:field="*{feedback}" class="form-control"
-                                placeholder="Nhận xét sau phỏng vấn..."></textarea>
-
-                        </div>
-
-                        <div class="col-12 mb-4">
-
-                            <label class="form-label">
-                                Recommendation
-                            </label>
-
-                            <select th:field="*{recommendation}" class="form-select">
-
-                                <option value="">
-                                    -- Select --
-                                </option>
-
-                                <option value="RECOMMEND">
-                                    Recommend
-                                </option>
-
-                                <option value="POTENTIAL">
-                                    Potential
-                                </option>
-
-                                <option value="REJECT">
-                                    Reject
-                                </option>
-
-                            </select>
-
-                        </div>
-
+                    <div class="alert alert-warning rounded-4">
+                        Khi status là <strong>COMPLETED</strong>, hệ thống sẽ cố gắng chuyển application sang
+                        <strong>INTERVIEWED</strong> nếu pipeline cho phép.
                     </div>
 
                     <div class="d-grid gap-3 d-md-flex justify-content-md-end">
-
                         <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
-
                             Back
-
                         </a>
 
                         <button type="submit" class="btn btn-primary px-5">
-
                             <i class="bi bi-check2-circle me-1"></i>
-                            Update
-
+                            Save Scorecard
                         </button>
-
                     </div>
-
                 </form>
 
             </div>
-
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

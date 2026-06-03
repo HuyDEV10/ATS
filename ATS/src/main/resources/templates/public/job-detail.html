@@ -4,12 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết việc làm - SmartATS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
             background: #f5f3ff;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: #1f2937;
         }
 
         .page-shell {
@@ -24,6 +27,29 @@
             border-radius: 28px;
             padding: 32px;
             margin-bottom: 24px;
+            box-shadow: 0 18px 45px rgba(91, 33, 182, 0.22);
+        }
+
+        .company-logo {
+            width: 84px;
+            height: 84px;
+            object-fit: cover;
+            border-radius: 22px;
+            background: white;
+            padding: 8px;
+        }
+
+        .company-logo-fallback {
+            width: 84px;
+            height: 84px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: 900;
+            color: white;
         }
 
         .soft-card {
@@ -47,6 +73,24 @@
             font-weight: 700;
             color: #374151;
         }
+
+        .company-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 999px;
+            padding: 8px 14px;
+            margin-right: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .section-heading {
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 
@@ -54,25 +98,51 @@
     <div class="page-shell">
 
         <div class="job-hero">
-            <div class="d-flex justify-content-between align-items-start gap-3">
-                <div>
-                    <h2 class="fw-bold mb-3" th:text="${job.title}">Job title</h2>
+            <div class="d-flex justify-content-between align-items-start gap-4 flex-wrap">
 
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
-                            Phòng ban:
-                            <span th:text="${job.department}">Engineering</span>
-                        </span>
+                <div class="d-flex gap-4 align-items-start flex-wrap">
+                    <div th:if="${company != null and !#strings.isEmpty(company.logoUrl)}">
+                        <img th:src="${company.logoUrl}" class="company-logo" alt="Company logo">
+                    </div>
 
-                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
-                            Địa điểm:
-                            <span th:text="${job.location}">Da Nang</span>
-                        </span>
+                    <div th:if="${company == null or #strings.isEmpty(company.logoUrl)}" class="company-logo-fallback">
+                        <span th:text="${company != null ? #strings.substring(company.name, 0, 1) : 'S'}">S</span>
+                    </div>
 
-                        <span class="badge bg-light text-dark rounded-pill px-3 py-2">
-                            Lương:
-                            <span th:text="${job.salaryRange}">Negotiable</span>
-                        </span>
+                    <div>
+                        <div class="mb-2">
+                            <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                                Đang tuyển dụng
+                            </span>
+                        </div>
+
+                        <h2 class="fw-bold mb-2" th:text="${job.title}">Job title</h2>
+
+                        <h5 class="fw-semibold mb-3" th:text="${company != null ? company.name : 'SmartATS Company'}">
+                            Company name
+                        </h5>
+
+                        <div class="company-meta">
+                            <span th:if="${job.department != null}">
+                                Phòng ban:
+                                <strong th:text="${job.department}">Engineering</strong>
+                            </span>
+
+                            <span th:if="${job.location != null}">
+                                Địa điểm:
+                                <strong th:text="${job.location}">Da Nang</strong>
+                            </span>
+
+                            <span th:if="${job.salaryRange != null}">
+                                Lương:
+                                <strong th:text="${job.salaryRange}">Negotiable</strong>
+                            </span>
+
+                            <span th:if="${company != null and company.industry != null}">
+                                Ngành:
+                                <strong th:text="${company.industry}">IT</strong>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -87,10 +157,45 @@
 
         <div class="row g-4">
             <div class="col-lg-7">
+
                 <div class="card soft-card mb-4">
                     <div class="card-body p-4">
-                        <h4 class="fw-bold mb-3">Mô tả công việc</h4>
-                        <p class="mb-0" th:text="${job.description}">
+                        <h4 class="section-heading">Thông tin công ty</h4>
+
+                        <div th:if="${company != null}">
+                            <p class="mb-2">
+                                <strong>Tên công ty:</strong>
+                                <span th:text="${company.name}">Company name</span>
+                            </p>
+
+                            <p class="mb-2" th:if="${company.website != null}">
+                                <strong>Website:</strong>
+                                <a th:href="${company.website}" th:text="${company.website}" target="_blank">
+                                    company.com
+                                </a>
+                            </p>
+
+                            <p class="mb-2" th:if="${company.industry != null}">
+                                <strong>Ngành nghề:</strong>
+                                <span th:text="${company.industry}">Industry</span>
+                            </p>
+
+                            <p class="mb-0" th:if="${company.address != null}">
+                                <strong>Địa chỉ:</strong>
+                                <span th:text="${company.address}">Address</span>
+                            </p>
+                        </div>
+
+                        <div th:if="${company == null}" class="text-muted">
+                            Chưa có thông tin công ty cho tin tuyển dụng này.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card soft-card mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="section-heading">Mô tả công việc</h4>
+                        <p class="mb-0" style="white-space: pre-line;" th:text="${job.description}">
                             Job description...
                         </p>
                     </div>
@@ -105,7 +210,7 @@
                         <li>Không upload ảnh, file nén ZIP/RAR, file scan mờ hoặc file không phải CV.</li>
                         <li>Email và số điện thoại trong form nên trùng với thông tin trong CV.</li>
                         <li>CV nên có các phần: thông tin cá nhân, kỹ năng, kinh nghiệm, học vấn, dự án.</li>
-                        <li>Nếu hệ thống không đọc được CV, hồ sơ vẫn được gửi nhưng HR sẽ phải kiểm tra thủ công.</li>
+                        <li>Nếu hệ thống không đọc được CV, hồ sơ vẫn được gửi nhưng HR sẽ kiểm tra thủ công.</li>
                     </ul>
                 </div>
             </div>
@@ -158,6 +263,77 @@
 
                                 <div class="form-text">
                                     File hợp lệ: PDF, DOC, DOCX. Tối đa 10MB.
+                                </div>
+                            </div>
+                            <div class="border rounded-4 p-3 mb-3 bg-light">
+                                <h6 class="fw-bold mb-2">
+                                    Minh chứng kỹ năng, không bắt buộc
+                                </h6>
+
+                                <p class="text-muted small mb-3">
+                                    Bạn có thể cung cấp tối đa 3 link chứng chỉ, GitHub project hoặc portfolio.
+                                    Nếu minh chứng hợp lệ và liên quan đến job, hệ thống có thể cộng thêm Skill Evidence
+                                    Bonus vào điểm CV.
+                                </p>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Skill Evidence 1</label>
+
+                                    <input name="evidenceSkill1" class="form-control mb-2"
+                                        placeholder="Skill name, ví dụ: Java">
+
+                                    <select name="evidenceType1" class="form-select mb-2">
+                                        <option value="">-- Evidence type --</option>
+                                        <option value="CERTIFICATE">Certificate</option>
+                                        <option value="GITHUB_PROJECT">GitHub Project</option>
+                                        <option value="PORTFOLIO">Portfolio</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+
+                                    <input name="evidenceProvider1" class="form-control mb-2"
+                                        placeholder="Provider, ví dụ: Coursera, GitHub, Udemy">
+
+                                    <input name="evidenceUrl1" class="form-control"
+                                        placeholder="Evidence URL, ví dụ: https://coursera.org/verify/demo">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Skill Evidence 2</label>
+
+                                    <input name="evidenceSkill2" class="form-control mb-2"
+                                        placeholder="Skill name, ví dụ: Spring Boot">
+
+                                    <select name="evidenceType2" class="form-select mb-2">
+                                        <option value="">-- Evidence type --</option>
+                                        <option value="CERTIFICATE">Certificate</option>
+                                        <option value="GITHUB_PROJECT">GitHub Project</option>
+                                        <option value="PORTFOLIO">Portfolio</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+
+                                    <input name="evidenceProvider2" class="form-control mb-2"
+                                        placeholder="Provider, ví dụ: GitHub">
+
+                                    <input name="evidenceUrl2" class="form-control" placeholder="Evidence URL">
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label">Skill Evidence 3</label>
+
+                                    <input name="evidenceSkill3" class="form-control mb-2"
+                                        placeholder="Skill name, ví dụ: SQL">
+
+                                    <select name="evidenceType3" class="form-select mb-2">
+                                        <option value="">-- Evidence type --</option>
+                                        <option value="CERTIFICATE">Certificate</option>
+                                        <option value="GITHUB_PROJECT">GitHub Project</option>
+                                        <option value="PORTFOLIO">Portfolio</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+
+                                    <input name="evidenceProvider3" class="form-control mb-2" placeholder="Provider">
+
+                                    <input name="evidenceUrl3" class="form-control" placeholder="Evidence URL">
                                 </div>
                             </div>
 

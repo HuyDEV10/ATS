@@ -22,6 +22,9 @@ import com.dacn.ATS.module.job.entity.Job;
 import com.dacn.ATS.module.job.mapper.JobMapper;
 import com.dacn.ATS.module.resume.entity.Resume;
 import com.dacn.ATS.module.resume.mapper.ResumeMapper;
+import com.dacn.ATS.module.verification.entity.SkillVerification;
+import com.dacn.ATS.module.verification.enums.VerificationStatus;
+import com.dacn.ATS.module.verification.service.VerificationService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,12 +34,13 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 @Service
 public class AiScoringServiceImpl implements AiScoringService {
 
-    private static final String ALGORITHM_VERSION = "RULE_WEIGHTED_V1";
+    private static final String ALGORITHM_VERSION = "RULE_WEIGHTED_V1_SKILL_EVIDENCE_BONUS";
 
     private final JobApplicationMapper applicationMapper;
     private final JobMapper jobMapper;
@@ -49,6 +53,7 @@ public class AiScoringServiceImpl implements AiScoringService {
     private final AiScoringPromptBuilder promptBuilder;
     private final AiClient aiClient;
     private final ObjectMapper objectMapper;
+    private final VerificationService verificationService;
 
     public AiScoringServiceImpl(
             JobApplicationMapper applicationMapper,
@@ -61,7 +66,8 @@ public class AiScoringServiceImpl implements AiScoringService {
             SkillExtractionService skillExtractionService,
             AiScoringPromptBuilder promptBuilder,
             AiClient aiClient,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            VerificationService verificationService) {
         this.applicationMapper = applicationMapper;
         this.jobMapper = jobMapper;
         this.candidateMapper = candidateMapper;
@@ -73,11 +79,11 @@ public class AiScoringServiceImpl implements AiScoringService {
         this.promptBuilder = promptBuilder;
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
+        this.verificationService = verificationService;
     }
 
     @Override
     public CvScoreResult scoreCv(Long applicationId) {
-
         JobApplication app = applicationMapper.selectById(applicationId);
 
         if (app == null) {
@@ -169,7 +175,7 @@ public class AiScoringServiceImpl implements AiScoringService {
 
         result.setStrengths(List.of(
                 "Có " + matched.size() + " kỹ năng/từ khóa phù hợp với JD",
-                "Mức độ khớp tổng thể: " + overall + "%"));
+                "Mức độ khớp tổng thể trước Skill Evidence Bonus: " + overall + "%"));
 
         result.setWeaknesses(
                 missing.isEmpty()
@@ -194,7 +200,36 @@ public class AiScoringServiceImpl implements AiScoringService {
             result.setMismatchSummary(verificationResult.summary());
         }
 
-        saveScore(app, candidate, resume, result, prompt.getVersion());
+        /*
+         * Skill Evidence Bonus:
+         * Ứng viên có thể cung cấp certificate/GitHub/portfolio link khi apply.
+         * Hệ thống lưu các link này thành SkillVerification.
+         * Khi HR chạy AI Screening, hệ thống cộng thêm bonus nếu evidence:
+         * - có confidence cao,
+         * - không bị reject,
+         * - liên quan đến job đang apply.
+         */
+        SkillEvidenceBonus evidenceBonus = calculateSkillEvidenceBonus(candidate, job);
+
+        if (evidenceBonus.points() > 0) {
+            int scoreBeforeBonus = result.getOverallScore();
+            int finalScore = clampScore(scoreBeforeBonus + evidenceBonus.points());
+
+            result.setOverallScore(finalScore);
+            result.setRecommendation(buildRecommendation(finalScore));
+
+            List<String> updatedStrengths = new ArrayList<>(
+                    result.getStrengths() == null ? List.of() : result.getStrengths());
+
+            updatedStrengths.add("Skill Evidence Bonus: +" + evidenceBonus.points()
+                    + " điểm từ minh chứng kỹ năng hợp lệ/liên quan đến job.");
+            updatedStrengths.add("Final Score sau bonus: " + scoreBeforeBonus + " + "
+                    + evidenceBonus.points() + " = " + finalScore);
+
+            result.setStrengths(updatedStrengths);
+        }
+
+        saveScore(app, candidate, resume, result, prompt.getVersion(), evidenceBonus);
         markApplicationScreened(app);
 
         return result;
@@ -271,10 +306,12 @@ public class AiScoringServiceImpl implements AiScoringService {
             Candidate candidate,
             Resume resume,
             CvScoreResult result,
-            String promptVersion) {
+            String promptVersion,
+            SkillEvidenceBonus evidenceBonus) {
 
         ApplicationScore score = new ApplicationScore();
 
+        score.setCompanyId(app.getCompanyId());
         score.setApplicationId(app.getId());
         score.setJobId(app.getJobId());
         score.setCandidateId(candidate.getId());
@@ -285,12 +322,12 @@ public class AiScoringServiceImpl implements AiScoringService {
         score.setExperienceScore(result.getExperienceScore());
         score.setKeywordScore(result.getKeywordScore());
 
-        score.setMatchedSkills(String.join(", ", result.getMatchedSkills()));
-        score.setMissingSkills(String.join(", ", result.getMissingSkills()));
-        score.setStrengths(String.join("\n", result.getStrengths()));
-        score.setWeaknesses(String.join("\n", result.getWeaknesses()));
+        score.setMatchedSkills(joinList(result.getMatchedSkills()));
+        score.setMissingSkills(joinList(result.getMissingSkills()));
+        score.setStrengths(joinLines(result.getStrengths()));
+        score.setWeaknesses(joinLines(result.getWeaknesses()));
         score.setRecommendation(result.getRecommendation());
-        score.setInterviewQuestions(String.join("\n", result.getInterviewQuestions()));
+        score.setInterviewQuestions(joinLines(result.getInterviewQuestions()));
         score.setAlgorithmVersion(ALGORITHM_VERSION);
         score.setPromptVersion(promptVersion);
 
@@ -298,16 +335,16 @@ public class AiScoringServiceImpl implements AiScoringService {
         score.setDeleted(0);
 
         scoreMapper.insert(score);
-        saveScoreDetails(score.getId(), result);
+        saveScoreDetails(score.getId(), result, evidenceBonus);
     }
 
-    private void saveScoreDetails(Long scoreId, CvScoreResult result) {
+    private void saveScoreDetails(Long scoreId, CvScoreResult result, SkillEvidenceBonus evidenceBonus) {
         saveScoreDetail(
                 scoreId,
                 "required_and_matching_skills",
                 45,
                 result.getSkillScore(),
-                String.join(", ", result.getMatchedSkills()),
+                joinList(result.getMatchedSkills()),
                 "Đánh giá mức độ khớp giữa kỹ năng trong JD và kỹ năng/CV của ứng viên");
 
         saveScoreDetail(
@@ -315,7 +352,7 @@ public class AiScoringServiceImpl implements AiScoringService {
                 "keyword_coverage",
                 35,
                 result.getKeywordScore(),
-                String.join(", ", result.getMissingSkills()),
+                joinList(result.getMissingSkills()),
                 "Đo tỷ lệ từ khóa quan trọng còn thiếu hoặc đã xuất hiện trong hồ sơ");
 
         saveScoreDetail(
@@ -325,6 +362,18 @@ public class AiScoringServiceImpl implements AiScoringService {
                 result.getExperienceScore(),
                 "experience_score=" + result.getExperienceScore(),
                 "Điểm kinh nghiệm dựa trên số năm kinh nghiệm khai báo và thông tin trong hồ sơ");
+
+        if (evidenceBonus != null) {
+            saveScoreDetail(
+                    scoreId,
+                    "skill_evidence_bonus",
+                    0,
+                    evidenceBonus.points(),
+                    evidenceBonus.summary(),
+                    "Điểm cộng từ certificate/GitHub/portfolio evidence do ứng viên cung cấp khi apply job. "
+                            + "Bonus chỉ được cộng nếu evidence có confidence cao, không bị reject và liên quan đến job. "
+                            + "Tổng bonus tối đa +10 điểm.");
+        }
     }
 
     private void saveScoreDetail(
@@ -390,11 +439,11 @@ public class AiScoringServiceImpl implements AiScoringService {
 
         List<String> questions = new ArrayList<>();
 
-        for (String skill : matched.stream().limit(3).toList()) {
+        for (String skill : safeList(matched).stream().limit(3).toList()) {
             questions.add("Bạn hãy mô tả một dự án thực tế đã sử dụng " + skill + "?");
         }
 
-        for (String skill : missing.stream().limit(2).toList()) {
+        for (String skill : safeList(missing).stream().limit(2).toList()) {
             questions.add("Bạn đã từng tiếp cận hoặc học về " + skill + " chưa?");
         }
 
@@ -478,6 +527,145 @@ public class AiScoringServiceImpl implements AiScoringService {
         return values;
     }
 
+    private SkillEvidenceBonus calculateSkillEvidenceBonus(Candidate candidate, Job job) {
+        if (candidate == null || candidate.getId() == null) {
+            return new SkillEvidenceBonus(0, "Không có candidate để kiểm tra skill evidence.");
+        }
+
+        List<SkillVerification> verifications;
+
+        try {
+            verifications = verificationService.listByCandidate(candidate.getId());
+        } catch (Exception e) {
+            return new SkillEvidenceBonus(0, "Không thể đọc skill evidence của ứng viên: " + e.getMessage());
+        }
+
+        if (verifications == null || verifications.isEmpty()) {
+            return new SkillEvidenceBonus(0, "Ứng viên chưa cung cấp skill evidence.");
+        }
+
+        String jobText = normalizeForEvidence(
+                safe(job.getTitle()) + " "
+                        + safe(job.getDescription()) + " "
+                        + safe(job.getDepartment()));
+
+        int totalBonus = 0;
+        List<String> used = new ArrayList<>();
+        List<String> ignored = new ArrayList<>();
+
+        for (SkillVerification verification : verifications) {
+            if (verification == null) {
+                continue;
+            }
+
+            String skill = verification.getSkillName();
+            int confidence = nullToZero(verification.getConfidenceScore());
+            String status = verification.getStatus();
+
+            boolean relatedToJob = isEvidenceRelatedToJob(skill, jobText);
+
+            if (!relatedToJob) {
+                ignored.add(formatEvidenceLine(verification, 0, "Ignored: skill is not related to this job"));
+                continue;
+            }
+
+            int bonus = calculateOneEvidenceBonus(status, confidence);
+
+            if (bonus > 0) {
+                totalBonus += bonus;
+                used.add(formatEvidenceLine(verification, bonus, "Used"));
+            } else {
+                ignored.add(
+                        formatEvidenceLine(verification, 0, "Ignored: low confidence, pending too weak, or rejected"));
+            }
+
+            if (totalBonus >= 10) {
+                totalBonus = 10;
+                break;
+            }
+        }
+
+        StringBuilder summary = new StringBuilder();
+
+        summary.append("Skill Evidence Bonus: +").append(totalBonus).append("\n");
+        summary.append("Rule: VERIFIED + confidence>=80 => +3; VERIFIED + confidence>=60 => +2; ")
+                .append("PENDING/SUBMITTED + confidence>=80 => +1; REJECTED/not related => +0. Max bonus: +10.\n");
+
+        if (!used.isEmpty()) {
+            summary.append("\nEvidence used:\n");
+            for (String item : used) {
+                summary.append("- ").append(item).append("\n");
+            }
+        }
+
+        if (!ignored.isEmpty()) {
+            summary.append("\nEvidence ignored:\n");
+            for (String item : ignored) {
+                summary.append("- ").append(item).append("\n");
+            }
+        }
+
+        if (used.isEmpty() && ignored.isEmpty()) {
+            summary.append("\nKhông có skill evidence phù hợp để cộng điểm.");
+        }
+
+        return new SkillEvidenceBonus(totalBonus, summary.toString());
+    }
+
+    private int calculateOneEvidenceBonus(String status, int confidence) {
+        if (VerificationStatus.REJECTED.name().equals(status)) {
+            return 0;
+        }
+
+        if (VerificationStatus.VERIFIED.name().equals(status)) {
+            if (confidence >= 80) {
+                return 3;
+            }
+
+            if (confidence >= 60) {
+                return 2;
+            }
+
+            return 0;
+        }
+
+        /*
+         * SUBMITTED / PENDING_VERIFICATION:
+         * Chưa được HR xác nhận nên chỉ cộng nhẹ nếu confidence cao.
+         */
+        if (VerificationStatus.SUBMITTED.name().equals(status)
+                || VerificationStatus.PENDING_VERIFICATION.name().equals(status)) {
+            if (confidence >= 80) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    private boolean isEvidenceRelatedToJob(String skill, String normalizedJobText) {
+        if (!StringUtils.hasText(skill) || !StringUtils.hasText(normalizedJobText)) {
+            return false;
+        }
+
+        String normalizedSkill = normalizeForEvidence(skill);
+
+        if (!StringUtils.hasText(normalizedSkill)) {
+            return false;
+        }
+
+        return normalizedJobText.contains(normalizedSkill);
+    }
+
+    private String formatEvidenceLine(SkillVerification verification, int bonus, String note) {
+        return safe(verification.getSkillName())
+                + " | provider=" + safe(verification.getProvider())
+                + " | status=" + safe(verification.getStatus())
+                + " | confidence=" + nullToZero(verification.getConfidenceScore())
+                + " | bonus=+" + bonus
+                + " | " + note;
+    }
+
     private int countMatchedSkills(String skills, String cvText) {
         if (!StringUtils.hasText(skills)) {
             return 0;
@@ -522,6 +710,18 @@ public class AiScoringServiceImpl implements AiScoringService {
                 .trim();
     }
 
+    private String normalizeForEvidence(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        return value.toLowerCase(Locale.ROOT)
+                .replace("-", " ")
+                .replace("_", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
     private String digitsOnly(String value) {
         if (value == null) {
             return "";
@@ -534,8 +734,29 @@ public class AiScoringServiceImpl implements AiScoringService {
         return Math.max(0, Math.min(100, value));
     }
 
+    private int nullToZero(Integer value) {
+        return value == null ? 0 : value;
+    }
+
+    private List<String> safeList(List<String> values) {
+        return values == null ? List.of() : values;
+    }
+
+    private String joinList(List<String> values) {
+        return String.join(", ", safeList(values));
+    }
+
+    private String joinLines(List<String> values) {
+        return String.join("\n", safeList(values));
+    }
+
     private String safe(Object value) {
         return value == null ? "" : value.toString();
+    }
+
+    private record SkillEvidenceBonus(
+            int points,
+            String summary) {
     }
 
     private record VerificationResult(

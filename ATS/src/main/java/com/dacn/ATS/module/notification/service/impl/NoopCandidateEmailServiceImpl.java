@@ -2,6 +2,7 @@ package com.dacn.ATS.module.notification.service.impl;
 
 import com.dacn.ATS.module.application.entity.JobApplication;
 import com.dacn.ATS.module.candidate.entity.Candidate;
+import com.dacn.ATS.module.interview.entity.InterviewRecord;
 import com.dacn.ATS.module.job.entity.Job;
 import com.dacn.ATS.module.notification.service.CandidateEmailService;
 
@@ -25,6 +26,11 @@ public class NoopCandidateEmailServiceImpl implements CandidateEmailService {
             String oldStatus,
             String newStatus,
             String hrNotes) {
+        // Mail disabled
+    }
+
+    @Override
+    public void sendInterviewInvitationEmail(Candidate candidate, Job job, InterviewRecord interview) {
         // Mail disabled
     }
 }

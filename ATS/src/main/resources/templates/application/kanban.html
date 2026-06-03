@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Application Pipeline Kanban - SmartATS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: #1e293b;
+        }
+
+        .page-shell {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 32px 18px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            color: white;
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 18px 45px rgba(13, 110, 253, 0.22);
+        }
+
+        .kanban-scroll {
+            overflow-x: auto;
+            padding-bottom: 12px;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 18px;
+            min-width: 1320px;
+            margin-top: 24px;
+        }
+
+        .kanban-column {
+            width: 300px;
+            flex: 0 0 300px;
+            background: #eef2f7;
+            border-radius: 22px;
+            padding: 14px;
+            min-height: 560px;
+        }
+
+        .column-title {
+            font-weight: 900;
+            font-size: 14px;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .app-card h6 {
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .small-muted {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .badge-soft {
+            border-radius: 999px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .quick-form select {
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .quick-form button {
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+
+        <div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-2">
+                    <i class="bi bi-kanban me-2"></i>
+                    Application Pipeline Kanban
+                </h2>
+                <p class="mb-0 opacity-75">
+                    Theo dõi ứng viên theo từng trạng thái tuyển dụng.
+                </p>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/applications" class="btn btn-light rounded-pill px-4 fw-bold">
+                    Danh sách applications
+                </a>
+                <a href="/dashboard/hr" class="btn btn-outline-light rounded-pill px-4 fw-bold">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success rounded-4 mt-4" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger rounded-4 mt-4" th:text="${error}"></div>
+
+        <div class="filter-card mt-4">
+            <form th:action="@{/applications/kanban}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Lọc theo Job</label>
+                    <select name="jobId" class="form-select">
+                        <option value="">Tất cả job</option>
+                        <option th:each="job : ${jobs}" th:value="${job.id}"
+                            th:selected="${selectedJobId != null and selectedJobId == job.id}" th:text="${job.title}">
+                            Job title
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button class="btn btn-primary rounded-pill px-4 w-100" type="submit">
+                        Lọc Kanban
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="kanban-scroll">
+            <div class="kanban-board">
+
+                <div class="kanban-column" th:each="status : ${statuses}">
+                    <div class="column-title">
+                        <span th:text="${status.name()}">STATUS</span>
+                        <span class="badge bg-dark rounded-pill"
+                            th:text="${board.get(status.name()) != null ? board.get(status.name()).size() : 0}">
+                            0
+                        </span>
+                    </div>
+
+                    <div th:if="${board.get(status.name()) == null or board.get(status.name()).isEmpty()}"
+                        class="text-center text-muted py-5">
+                        Chưa có hồ sơ.
+                    </div>
+
+                    <div th:each="app : ${board.get(status.name())}" class="app-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <h6 th:text="${candidateNameMap.get(app.candidateId)}">Candidate Name</h6>
+                                <div class="small-muted" th:text="${candidateEmailMap.get(app.candidateId)}">
+                                    email
+                                </div>
+                            </div>
+
+                            <span class="badge bg-primary badge-soft">
+                                #<span th:text="${app.id}">1</span>
+                            </span>
+                        </div>
+
+                        <div class="mt-3 small-muted">
+                            <i class="bi bi-briefcase me-1"></i>
+                            <span th:text="${jobTitleMap.get(app.jobId)}">Job title</span>
+                        </div>
+
+                        <div class="mt-2">
+                            <span class="badge bg-secondary badge-soft"
+                                th:text="${app.verificationStatus != null ? app.verificationStatus : 'NOT_CHECKED'}">
+                                VERIFICATION
+                            </span>
+
+                            <span th:if="${aiScoreMap.get(app.id) != null}" class="badge bg-success badge-soft">
+                                AI:
+                                <span th:text="${aiScoreMap.get(app.id)}">0</span>
+                            </span>
+
+                            <span th:if="${aiScoreMap.get(app.id) == null}"
+                                class="badge bg-warning text-dark badge-soft">
+                                No AI
+                            </span>
+                        </div>
+
+                        <div class="mt-3 d-grid gap-2">
+                            <a th:href="@{/applications/view/{id}(id=${app.id})}"
+                                class="btn btn-outline-primary btn-sm rounded-pill">
+                                Xem chi tiết
+                            </a>
+                        </div>
+
+                        <form class="quick-form mt-3" th:action="@{/applications/change-status/{id}(id=${app.id})}"
+                            method="post">
+                            <input type="hidden" name="redirectTo" value="kanban">
+
+                            <select name="status" class="form-select form-select-sm mb-2">
+                                <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.name()}"
+                                    th:selected="${s.name() == app.status}">
+                                    STATUS
+                                </option>
+                            </select>
+
+                            <input type="hidden" name="hrNotes" value="Updated from Kanban board">
+
+                            <button class="btn btn-dark btn-sm w-100" type="submit">
+                                Chuyển trạng thái
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

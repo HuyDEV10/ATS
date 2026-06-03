@@ -27,16 +27,51 @@ public class CandidateApplyController {
             @RequestParam(required = false) String skills,
             @RequestParam(required = false, defaultValue = "0") Integer experienceYears,
             @RequestParam("file") MultipartFile file,
+
+            // Optional Skill Evidence 1
+            @RequestParam(required = false) String evidenceSkill1,
+            @RequestParam(required = false) String evidenceType1,
+            @RequestParam(required = false) String evidenceProvider1,
+            @RequestParam(required = false) String evidenceUrl1,
+
+            // Optional Skill Evidence 2
+            @RequestParam(required = false) String evidenceSkill2,
+            @RequestParam(required = false) String evidenceType2,
+            @RequestParam(required = false) String evidenceProvider2,
+            @RequestParam(required = false) String evidenceUrl2,
+
+            // Optional Skill Evidence 3
+            @RequestParam(required = false) String evidenceSkill3,
+            @RequestParam(required = false) String evidenceType3,
+            @RequestParam(required = false) String evidenceProvider3,
+            @RequestParam(required = false) String evidenceUrl3,
+
             RedirectAttributes redirectAttributes) {
 
         try {
             PublicApplyRequest request = new PublicApplyRequest();
+
             request.setName(name);
             request.setEmail(email);
             request.setPhone(phone);
             request.setSkills(skills);
             request.setExperienceYears(experienceYears);
             request.setFile(file);
+
+            request.setEvidenceSkill1(evidenceSkill1);
+            request.setEvidenceType1(evidenceType1);
+            request.setEvidenceProvider1(evidenceProvider1);
+            request.setEvidenceUrl1(evidenceUrl1);
+
+            request.setEvidenceSkill2(evidenceSkill2);
+            request.setEvidenceType2(evidenceType2);
+            request.setEvidenceProvider2(evidenceProvider2);
+            request.setEvidenceUrl2(evidenceUrl2);
+
+            request.setEvidenceSkill3(evidenceSkill3);
+            request.setEvidenceType3(evidenceType3);
+            request.setEvidenceProvider3(evidenceProvider3);
+            request.setEvidenceUrl3(evidenceUrl3);
 
             PublicApplyResult result = publicApplyService.applyToJob(jobId, request);
 
